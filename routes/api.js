@@ -1,12 +1,10 @@
 import express from "express";
 import authRoutes from "../src/auth/auth.routes";
-import User from "../models/user";
+import chatRoutes from "../src/chat/chat.route";
 const router = express.Router();
 
 router.use("/auth", authRoutes);
 
-router.get("/chat", async (req, res) => {
-    return res.render("chat", {});
-});
+router.use("/chat", chatRoutes);
 
 export default router;

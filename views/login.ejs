@@ -27,8 +27,8 @@
                             <div class="text-center">
                                 <img src="/assets/images/big/icon.png" alt="wrapkit" />
                             </div>
-                            <h2 class="mt-3 text-center">Sign In</h2>
-                            <form class="mt-4">
+                            <h2 class="mt-3 text-center">Login</h2>
+                            <form class="mt-4" action="" method="post">
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
@@ -39,6 +39,7 @@
                                                 class="form-control"
                                                 id="email"
                                                 type="email"
+                                                name="email"
                                                 placeholder="enter your email"
                                                 required
                                             />
@@ -51,20 +52,23 @@
                                             </label>
                                             <input
                                                 class="form-control"
-                                                id="pwd"
-                                                type="passsword"
+                                                id="password"
+                                                name="password"
+                                                type="password"
                                                 placeholder="enter your password"
                                             />
                                         </div>
                                     </div>
                                     <div class="col-lg-12 text-center">
                                         <button type="submit" class="btn w-100 btn-dark">
-                                            Sign In
+                                            Login
                                         </button>
                                     </div>
                                     <div class="col-lg-12 text-center mt-5">
                                         Don't have an account?
-                                        <a href="" class="text-danger">Register</a>
+                                        <a href="/api/v1/auth/register" class="text-danger">
+                                            Register
+                                        </a>
                                     </div>
                                 </div>
                             </form>
