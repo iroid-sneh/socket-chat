@@ -1,0 +1,32 @@
+{
+    "name": "socket-chat",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "nodemon --exec babel-node app.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "dotenv": "^16.4.7",
+        "ejs": "^3.1.10",
+        "express": "^5.1.0",
+        "express-async-handler": "^1.2.0",
+        "express-session": "^1.18.1",
+        "fs": "^0.0.1-security",
+        "mongoose": "^8.13.2",
+        "multer": "^1.4.5-lts.2",
+        "nodemon": "^3.1.9",
+        "path": "^0.12.7",
+        "socket.io": "^4.8.1"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.27.0",
+        "@babel/core": "^7.26.10",
+        "@babel/node": "^7.26.0",
+        "@babel/preset-env": "^7.26.9"
+    }
+}
