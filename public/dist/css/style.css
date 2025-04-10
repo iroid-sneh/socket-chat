@@ -16694,6 +16694,7 @@ Table Cell
   height: 42px;
   line-height: 20px;
   padding: 10px;
+  margin-left: 3px;
 }
 .btn-circle .feather, .btn-circle-lg .feather {
   height: 18px;

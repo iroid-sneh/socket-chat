@@ -28,6 +28,8 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+// In your Express app setup (e.g., app.js or server.js)
+app.use("/media/files", express.static(path.join(__dirname, "media/files")));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

@@ -27,6 +27,14 @@
             .user-item img {
                 object-fit: cover;
             }
+            .chat-content img,
+            .chat-content video,
+            .chat-content iframe {
+                border: 1px solid #ddd;
+                padding: 5px;
+                background: white;
+            }
+
             /* .box.msg {
                 max-width: 70%;
                 word-wrap: break-word;
@@ -138,11 +146,28 @@
                                                         <%= recipientName %>
                                                     </h5>
                                                 </div>
+                                                <!-- Typing status -->
+                                                <div
+                                                    id="typing-status"
+                                                    style="
+                                                        margin-left: 10px;
+                                                        font-style: b;
+                                                        color: gray;
+                                                        display: none;
+                                                    "
+                                                ></div>
 
                                                 <!-- Messages will appear here -->
                                             </ul>
                                         </div>
                                         <div class="card-body border-top">
+                                            <!-- Selected file display -->
+                                            <div
+                                                id="selectedFileName"
+                                                class="text-muted mb-1"
+                                                style="font-size: 14px"
+                                            ></div>
+
                                             <div class="row">
                                                 <div class="col-9">
                                                     <div class="input-field mt-0 mb-0">
@@ -158,10 +183,24 @@
                                                     <a
                                                         class="btn-circle bg-cyan float-end text-white d-flex align-items-center justify-content-center"
                                                         id="sendBtn"
+                                                        style="margin-left: 3px"
                                                         href="#"
                                                     >
                                                         <i class="fas fa-paper-plane"></i>
                                                     </a>
+                                                    <label
+                                                        for="fileInput"
+                                                        class="btn-circle bg-cyan float-end text-white d-flex align-items-center justify-content-center"
+                                                        id="fileBtn"
+                                                        style="cursor: pointer"
+                                                    >
+                                                        <i class="fas fa-link"></i>
+                                                    </label>
+                                                    <input
+                                                        type="file"
+                                                        id="fileInput"
+                                                        style="display: none"
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
@@ -187,13 +226,20 @@
         <script>
             const socket = io();
 
+            const fileInput = document.getElementById("fileInput");
+            const selectedFileName = document.getElementById("selectedFileName");
+            const messageInput = document.getElementById("textarea1");
+            const sendBtn = document.getElementById("sendBtn");
+
             const senderId = document.getElementById("currentUserId").value;
             const recipientId = document.getElementById("recipientUserId").value;
+            const chatInput = document.getElementById("textarea1");
 
             socket.emit("join", { userId: senderId });
 
             const chatBox = document.querySelector(".chat-box");
             let lastMessageId = null;
+
             // Send Message
             $("#textarea1").keypress(function (e) {
                 if (e.keyCode === 13 && !e.shiftKey) {
@@ -207,6 +253,10 @@
                             isGroup: false,
                         });
                         $(this).val("");
+
+                        // Emit stopTyping when user sends a message
+                        socket.emit("stopTyping", { sender: senderId, recipient: recipientId });
+                        isTyping = false;
                     }
                 }
             });
@@ -216,40 +266,117 @@
                 const alignment = msg.senderId === senderId ? "odd text-end" : "";
                 const bgClass = msg.senderId === senderId ? "bg-primary text-white" : "bg-light";
 
+                let content;
+
+                if (msg.message?.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                    content = `<img src="${msg.message}" style="max-width:200px; max-height:200px;">`;
+                } else if (msg.isVideo || msg.message?.match(/\.(mp4|webm|ogg)$/i)) {
+                    content = `<video controls src="${msg.message}" width="250" style="max-height: 200px;"></video>`;
+                } else if (msg.isAudio || msg.message?.match(/\.(mp3|wav|ogg)$/i)) {
+                    content = `<audio controls src="${msg.message}" style="width: 250px;"></audio>`;
+                } else if (msg.message?.startsWith("/media/")) {
+                    content = `<a href="${msg.message}" download>📎 ${msg.message
+                        .split("/")
+                        .pop()}</a>`;
+                } else {
+                    content = msg.message;
+                }
+
                 const chatItem = `<li class="chat-item ${alignment} list-style-none mt-3">
-                    <div class="chat-content d-inline-block ps-3">
-                                    <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">${
-                    msg.message
-                }</div>
-                    </div>
-            <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
-                ${new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                })}
+        <div class="chat-content d-inline-block ps-3">
+            <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
+                ${content}
             </div>
+        </div>
+        <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
+            ${new Date(msg.createdAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+            })}
         </div>
     </li>`;
 
                 $("#chat-list").append(chatItem);
                 chatBox.scrollTop = chatBox.scrollHeight;
-                lastMessageId = msg._id;
             });
 
             // Switch recipient
             function setRecipient(id, name) {
                 document.getElementById("recipientUserId").value = id;
-
-                // Clear previous messages
                 $("#chat-list").html("");
 
-                // Emit to load chat history
                 socket.emit("loadMessages", {
                     sender: senderId,
                     recipient: id,
                     isGroup: false,
                 });
             }
+
+            const typingStatus = document.getElementById("typing-status");
+            let typingTimeout;
+            let isTyping = false;
+
+            // Emit typing event when input is changing
+            chatInput.addEventListener("input", () => {
+                if (!isTyping) {
+                    socket.emit("typing", { sender: senderId, recipient: recipientId });
+                    isTyping = true;
+                }
+
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    socket.emit("stopTyping", { sender: senderId, recipient: recipientId });
+                    isTyping = false;
+                }, 2000); // 2 seconds idle time
+            });
+
+            // Show typing status
+            socket.on("typing", ({ sender }) => {
+                if (sender === recipientId) {
+                    // Only add if not already present
+                    if (!document.getElementById("typing-indicator")) {
+                        const typingBubble = document.createElement("li");
+                        typingBubble.id = "typing-indicator";
+                        typingBubble.className = "chat-item list-style-none mt-3";
+
+                        typingBubble.innerHTML = `
+                          <div class="chat-content d-inline-block ps-3">
+                              <div class="box msg p-2 d-inline-block mb-1 bg-light rounded">
+                                  <i>Typing...</i>
+                              </div>
+                          </div>
+                      `;
+
+                        document.getElementById("chat-list").appendChild(typingBubble);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                }
+            });
+
+            socket.on("stopTyping", ({ sender }) => {
+                if (sender === recipientId) {
+                    const typingBubble = document.getElementById("typing-indicator");
+                    if (typingBubble) typingBubble.remove();
+                }
+            });
+
+            fileInput.addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const arrayBuffer = await file.arrayBuffer();
+                const fileBuffer = new Uint8Array(arrayBuffer); // Convert to Uint8Array
+
+                socket.emit("file", {
+                    sender: senderId,
+                    recipient: recipientId,
+                    fileName: file.name,
+                    fileBuffer: [...fileBuffer], // Convert to regular array
+                });
+                e.target.value = "";
+                selectedFileName.textContent = "";
+                selectedFileName.style.display = "none";
+            });
         </script>
     </body>
 </html>
