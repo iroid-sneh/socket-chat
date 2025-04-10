@@ -36,7 +36,6 @@ class authServices {
                 maxAge: 24 * 60 * 60 * 1000, // 1 day
             });
 
-
             return res.redirect("/api/v1/chat");
         } catch (error) {
             console.log("Error", error);

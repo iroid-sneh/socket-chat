@@ -35,30 +35,33 @@ io.on("connection", (socket) => {
         const { sender, recipient, message, isGroup = false } = msg;
         if (!message) return;
 
-        const chatMessage = new ChatMessages({
-            senderId: sender,
-            receiverId: recipient,
-            message,
-            isGroup,
-        }).save();
+        try {
+            const chatMessage = await new ChatMessages({
+                senderId: sender,
+                receiverId: recipient,
+                message,
+                isGroup,
+            }).save();
 
-        const senderUser = await User.findById(sender);
-        const messageToSend = {
-            ...chatMessage.toObject(),
-            senderName: senderUser?.name || "Unknown",
-        };
+            const senderUser = await User.findById(sender);
+            const messageToSend = {
+                ...chatMessage.toObject(),
+                senderName: senderUser?.name || "Unknown",
+            };
 
-        if (isGroup) {
-            io.to(recipient).emit("message", chatMessage);
-        } else {
-            const recipientSocket = connectedSockets.get(recipient);
-            if (recipientSocket) {
-                recipientSocket.emit("message", messageToSend);
+            if (isGroup) {
+                socket.to(recipient).emit("message", messageToSend);
+            } else {
+                const recipientSocket = connectedSockets.get(recipient);
+                if (recipientSocket) {
+                    io.to(recipientSocket).emit("message", messageToSend);
+                }
+                socket.emit("message", messageToSend); // Send back to sender too
             }
-            socket.emit("message", messageToSend);
+        } catch (error) {
+            console.error("Error handling message:", error);
         }
     });
-
     //-------------------------------------------------------/
     // Seen status handling
     //-------------------------------------------------------/
@@ -115,9 +118,9 @@ io.on("connection", (socket) => {
     // Disconnect
     //-------------------------------------------------------/
     socket.on("disconnect", () => {
-        const user = [...connectedSockets.keys()].find(
-            (key) => connectedSockets.get(key) === socket
-        );
+        const user = [...connectedSockets.entries()].find(
+            ([, socketId]) => socketId === socket.id
+        )?.[0];
         if (user) {
             connectedSockets.delete(user);
             connectedUsers.delete(user);

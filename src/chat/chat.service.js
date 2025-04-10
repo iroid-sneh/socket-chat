@@ -51,22 +51,32 @@ class chatService {
      * @param {*} res
      */
     static async userChatById(id, req, res) {
-        const sender = req.user; // from Auth middleware
+        const sender = req.user;
         const recipientId = id;
 
-        // (Optional) Get recipient name if you want to show it in the header
         const recipient = await User.findById(recipientId);
 
-        //Left Side Panel Users list
-        const users = await User.find({ _id: { $ne: sender._id } });
+        // Get messages between these users
+        const messages = await ChatMessages.find({
+            $or: [
+                { senderId: sender._id, receiverId: recipientId },
+                { senderId: recipientId, receiverId: sender._id },
+            ],
+        }).sort({ createdAt: 1 });
+
+        // Left Side Panel Users list
+        const users = await User.find({
+            _id: { $nin: [sender._id, recipientId] },
+        });
 
         res.render("chat", {
             senderId: sender._id,
             recipientId,
-            senderName: sender.name, // or full name
+            senderName: sender.name,
             recipientName: recipient?.name || "User",
             recipientImage: recipient.image,
-            users
+            users,
+            initialMessages: messages, // Pass messages to the view
         });
     }
 }

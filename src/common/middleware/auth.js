@@ -3,7 +3,6 @@ import User from "../../../models/user.js";
 
 export const Auth = async (req, res, next) => {
     try {
-
         const token = req.cookies?.token;
         if (!token) return res.redirect("/api/v1/auth/login");
 

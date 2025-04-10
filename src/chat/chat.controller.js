@@ -12,7 +12,7 @@ class chatController {
     }
 
     /**
-     * @description: User chat 
+     * @description: User chat
      * @param {*} req
      * @param {*} res
      */
