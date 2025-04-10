@@ -1,106 +1,116 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon.png" />
-        <title>Chat Template</title>
-        <link href="/dist/css/style.min.css" rel="stylesheet" />
-        <style>
-            .chat-img img {
-                object-fit: cover;
-            }
-            .chat-box {
-                height: calc(100vh - 111px);
-                overflow-y: auto;
-            }
-        </style>
-    </head>
 
-    <body>
-        <input type="hidden" id="currentUserId" />
-        <input type="hidden" id="recipientUserId" />
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon.png" />
+    <title>Chat Template</title>
+    <link href="/dist/css/style.min.css" rel="stylesheet" />
+    <style>
+        .chat-img img {
+            object-fit: cover;
+        }
 
-        <div
-            id="main-wrapper"
-            data-theme="light"
-            data-layout="vertical"
-            data-navbarbg="skin6"
-            data-sidebartype="full"
-            data-sidebar-position="fixed"
-            data-header-position="fixed"
-            data-boxed-layout="full"
-        >
-            <div class="page-wrapper">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="row g-0">
-                                    <div class="col-lg-3 col-xl-2 border-end">
-                                        <div class="card-body border-bottom">
-                                            <form>
-                                                <input
-                                                    class="form-control"
-                                                    type="text"
-                                                    placeholder="Search Contact"
-                                                />
-                                            </form>
-                                        </div>
-                                        <div class="border-bottom px-4 py-2 bg-light">
-                                            <h5 id="chatHeader" class="mb-0">
-                                                Select a user to start chat
-                                            </h5>
-                                        </div>
-                                        <div
-                                            class="scrollable position-relative"
-                                            style="height: calc(100vh - 111px)"
-                                        >
-                                            <ul class="mailbox list-style-none">
-                                                <li>
-                                                    <div class="message-center">
-                                                        <div id="user-list"></div>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
+        .chat-box {
+            height: calc(100vh - 111px);
+            overflow-y: auto;
+        }
+
+        .user-hover:hover {
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+
+        .user-item img {
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="hidden" id="currentUserId" value="<%= senderId %>" />
+    <input type="hidden" id="recipientUserId" value="<%= recipientId %>" />
+
+
+    <div id="main-wrapper" data-theme="light" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+        data-sidebar-position="fixed" data-header-position="fixed" data-boxed-layout="full">
+        <div class="page-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="row g-0">
+                                <div class="col-lg-3 col-xl-2 border-end">
+                                    <div class="card-body border-bottom">
+                                        <form>
+                                            <input class="form-control" type="text" placeholder="Search Contact" />
+                                        </form>
                                     </div>
-                                    <div class="col-lg-9 col-xl-10">
-                                        <div
-                                            class="chat-box scrollable position-relative"
-                                            style="height: calc(100vh - 111px)"
-                                        >
-                                            <ul
-                                                class="chat-list list-style-none px-3 pt-3"
-                                                id="chat-list"
-                                            >
-                                                <!-- Messages will appear here -->
-                                            </ul>
-                                        </div>
-                                        <div class="card-body border-top">
-                                            <div class="row">
-                                                <div class="col-9">
-                                                    <div class="input-field mt-0 mb-0">
-                                                        <input
-                                                            id="textarea1"
-                                                            placeholder="Type and enter"
-                                                            class="form-control border-0"
-                                                            type="text"
-                                                        />
+                                    <!-- <div class="border-bottom px-4 py-2 bg-light">
+                                        <h5 id="chatHeader" class="mb-0">
+                                            Select a user to start chat
+                                        </h5>
+                                    </div> -->
+                                    <div class="scrollable position-relative" style="height: calc(100vh - 111px)">
+                                        <ul class="mailbox list-style-none">
+                                            <li>
+                                                <div class="message-center">
+                                                    <div id="user-list">
+                                                        <ul id="user-list">
+                                                            <% users.forEach(user=> { %>
+                                                                <li
+                                                                    class="user-item px-3 py-2 d-flex align-items-center user-hover">
+                                                                    <a href="/api/v1/chat/<%= user._id %>"
+                                                                        class="d-flex align-items-center text-decoration-none text-dark w-100">
+                                                                        <img src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
+                                                                            alt="user" class="rounded-circle me-2"
+                                                                            width="40" height="40" />
+                                                                        <span class="fw-bold">
+                                                                            <%= user.name %>
+                                                                        </span>
+                                                                    </a>
+                                                                </li>
+                                                                <% }) %>
+                                                        </ul>
                                                     </div>
                                                 </div>
-                                                <div class="col-3">
-                                                    <a
-                                                        class="btn-circle bg-cyan float-end text-white d-flex align-items-center justify-content-center"
-                                                        id="sendBtn"
-                                                        href="#"
-                                                    >
-                                                        <i class="fas fa-paper-plane"></i>
-                                                    </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-lg-9 col-xl-10">
+                                    <div class="chat-box scrollable position-relative"
+                                        style="height: calc(100vh - 111px)">
+                                        <ul class="chat-list list-style-none px-3 pt-3" id="chat-list">
+                                            <div class="d-flex align-items-center px-3 py-2 border-bottom">
+                                                <img src="<%= process.env.APP_URL_ADMIN %>/<%= recipientImage %>" alt="user" class="rounded-circle me-2"
+                                                    width="40" height="40" />
+                                                <h5 id="chatHeader" class="mb-0 fw-bold">
+                                                    <%= recipientName %>
+                                                </h5>
+                                            </div>
+
+
+                                            <!-- Messages will appear here -->
+                                        </ul>
+                                    </div>
+                                    <div class="card-body border-top">
+                                        <div class="row">
+                                            <div class="col-9">
+                                                <div class="input-field mt-0 mb-0">
+                                                    <input id="textarea1" placeholder="Type and enter"
+                                                        class="form-control border-0" type="text" />
                                                 </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <a class="btn-circle bg-cyan float-end text-white d-flex align-items-center justify-content-center"
+                                                    id="sendBtn" href="#">
+                                                    <i class="fas fa-paper-plane"></i>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -111,51 +121,52 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
-        <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
-        <script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="/dist/js/app-style-switcher.js"></script>
-        <script src="/dist/js/feather.min.js"></script>
-        <script src="/assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
-        <script src="/dist/js/sidebarmenu.js"></script>
-        <script src="/dist/js/custom.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
+    <script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/dist/js/app-style-switcher.js"></script>
+    <script src="/dist/js/feather.min.js"></script>
+    <script src="/assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
+    <script src="/dist/js/sidebarmenu.js"></script>
+    <script src="/dist/js/custom.min.js"></script>
 
-        <script>
-            const socket = io();
+    <script>
+        const socket = io();
 
-            const senderId = prompt("Enter your user ID (sender):");
-            const recipientId = prompt("Enter recipient's user ID:");
+        // const senderId = prompt("Enter your user ID (sender):");
+        // const recipientId = prompt("Enter recipient's user ID:");
 
-            document.getElementById("currentUserId").value = senderId;
-            document.getElementById("recipientUserId").value = recipientId;
+        const senderId = document.getElementById("currentUserId").value;
+        const recipientId = document.getElementById("recipientUserId").value;
 
-            socket.emit("join", { userId: senderId });
+        socket.emit("join", { userId: senderId });
 
-            const chatBox = document.querySelector(".chat-box");
+        const chatBox = document.querySelector(".chat-box");
 
-            // Send Message
-            $("#textarea1").keypress(function (e) {
-                if (e.keyCode === 13 && !e.shiftKey) {
-                    e.preventDefault();
-                    const msg = $(this).val().trim();
-                    if (msg !== "") {
-                        socket.emit("message", {
-                            sender: senderId,
-                            recipient: recipientId,
-                            message: msg,
-                            isGroup: false,
-                        });
-                        $(this).val("");
-                    }
+        // Send Message
+        $("#textarea1").keypress(function (e) {
+            if (e.keyCode === 13 && !e.shiftKey) {
+                e.preventDefault();
+                const msg = $(this).val().trim();
+                if (msg !== "") {
+                    socket.emit("message", {
+                        sender: senderId,
+                        recipient: recipientId,
+                        message: msg,
+                        isGroup: false,
+                    });
+                    $(this).val("");
                 }
-            });
+            }
+        });
 
-            // Receive message
-            socket.on("message", (msg) => {
-                const alignment = msg.senderId === senderId ? "odd text-end" : "";
-                const chatItem = `<li class="chat-item ${alignment} list-style-none mt-3">
+        // Receive message
+        socket.on("message", (msg) => {
+            const alignment = msg.senderId === senderId ? "odd text-end" : "";
+            const chatItem = `<li class="chat-item ${alignment} list-style-none mt-3">
         <div class="chat-content d-inline-block ps-3">
             <div class="sender-name text-muted small mb-1 fw-bold">${msg.senderName || ""}</div>
             <div class="box msg p-2 d-inline-block mb-1">${msg.message}</div>
@@ -168,48 +179,49 @@
         </div>
     </li>
 `;
-                $("#chat-list").append(chatItem);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            });
+            $("#chat-list").append(chatItem);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
 
-            // Typing indicator
-            $("#textarea1").on("input", function () {
-                socket.emit("typing", {
-                    sender: senderId,
-                    recipient: recipientId,
-                    isTyping: $(this).val().length > 0,
-                    isGroup: false,
-                });
+        // Typing indicator
+        $("#textarea1").on("input", function () {
+            socket.emit("typing", {
+                sender: senderId,
+                recipient: recipientId,
+                isTyping: $(this).val().length > 0,
+                isGroup: false,
             });
+        });
 
-            socket.on("typing", ({ sender, isTyping }) => {
-                if (sender === recipientId) {
-                    // You can display a "typing..." element here
-                    const chatItem = `
+        socket.on("typing", ({ sender, isTyping }) => {
+            if (sender === recipientId) {
+                // You can display a "typing..." element here
+                const chatItem = `
                     <li class="chat-item ${alignment} list-style-none mt-3">
                         <div class="chat-content d-inline-block ps-3">
                             <div class="box msg p-2 d-inline-block mb-1">Typing...</div>
                         </div>
                     </li>
                 `;
-                    console.log(isTyping ? "User is typing..." : "");
-                }
-            });
-
-            function setRecipient(id, name) {
-                document.getElementById("recipientUserId").value = id;
-                document.getElementById("chatHeader").innerText = `Chat with ${name}`;
-
-                // Clear previous messages
-                $("#chat-list").html("");
-
-                // Emit to load chat history
-                socket.emit("loadMessages", {
-                    sender: senderId,
-                    recipient: id,
-                    isGroup: false,
-                });
+                console.log(isTyping ? "User is typing..." : "");
             }
-        </script>
-    </body>
+        });
+
+        function setRecipient(id, name) {
+            document.getElementById("recipientUserId").value = id;
+            document.getElementById("chatHeader").innerText = `Chat with ${name}`;
+
+            // Clear previous messages
+            $("#chat-list").html("");
+
+            // Emit to load chat history
+            socket.emit("loadMessages", {
+                sender: senderId,
+                recipient: id,
+                isGroup: false,
+            });
+        }
+    </script>
+</body>
+
 </html>

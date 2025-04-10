@@ -6,6 +6,7 @@ import ejs from "ejs";
 import fs from "fs";
 import session from "express-session";
 import http from "http";
+import cookieParser from "cookie-parser";
 import io from "./src/chat/chat.connection";
 import routes from "./routes/index";
 import { mongoConnection } from "./models/connection";
@@ -25,6 +26,7 @@ app.use(
     })
 );
 
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(express.json());

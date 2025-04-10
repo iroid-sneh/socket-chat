@@ -16,5 +16,4 @@ router.get("/login", asyncWrap(authController.loginPage));
 
 router.post("/login", asyncWrap(authController.login));
 
-router.get("/users", asyncWrap(authController.users));
 export default router;

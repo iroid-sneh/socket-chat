@@ -1,38 +1,43 @@
 import bcrypt from "bcryptjs";
 import User from "../../models/user";
+import { generateToken } from "../common/helper";
 
 class authServices {
-    /**
-     * @description: Register Page
-     * @param {*} req
-     * @param {*} res
-     */
     static async registerPage(req, res) {
         return res.render("register");
     }
 
-    /**
-     * @description: Register Users
-     * @param {*} data
-     * @param {*} file
-     * @param {*} req
-     * @param {*} res
-     */
     static async register(data, file, req, res) {
-        // console.log(data);
         try {
             const { name, email, password } = data;
-            const findUser = await User.findOne({ email: email });
-            if (findUser) {
+            const existingUser = await User.findOne({ email });
+
+            if (existingUser) {
                 return res.status(400).send({
                     success: false,
-                    message: "User Already Exists",
+                    message: "User already exists",
                 });
             }
-            const image = `users/${file.filename}`;
-            const user = await User.create({ name, email, password, image });
 
-            return res.status(200).redirect("/api/v1/chat");
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const image = `users/${file.filename}`;
+            const user = await User.create({
+                name,
+                email,
+                password: hashedPassword,
+                image,
+            });
+
+            const token = generateToken(user._id);
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production", // Only over HTTPS in production
+                sameSite: "lax", // Or "strict"
+                maxAge: 24 * 60 * 60 * 1000, // 1 day
+            });
+
+
+            return res.redirect("/api/v1/chat");
         } catch (error) {
             console.log("Error", error);
             return res.status(500).send({
@@ -42,33 +47,31 @@ class authServices {
         }
     }
 
-    /**
-     * @description: Login Page
-     * @param {*} req
-     * @param {*} res
-     */
     static async loginPage(req, res) {
-        return res.render("login");
+        return res.render("login", { error: null });
     }
 
-    /**
-     * @description: Login
-     * @param {*} data
-     * @param {*} req
-     * @param {*} res
-     */
     static async login(data, req, res) {
         const { email, password } = data;
 
-        const findUser = await User.findOne({ email });
-        if (!findUser) {
-            return res.redirect("back");
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.render("login", { error: "Invalid credentials" });
         }
 
-        const checkPassword = bcrypt.compare(findUser.password, password);
-        if (!checkPassword) {
-            return res.redirect("back");
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.render("login", { error: "Invalid credentials" });
         }
+
+        const token = generateToken(user._id);
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // Only over HTTPS in production
+            sameSite: "lax", // Or "strict"
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
+        });
+        // console.log("Login successful, redirecting...");
 
         return res.redirect("/api/v1/chat");
     }

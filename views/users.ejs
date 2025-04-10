@@ -1,117 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Chat Users</title>
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        />
-        <style>
-            * {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            }
 
-            body {
-                background-color: #f0f2f5;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100vh;
-            }
+<head>
+    <meta charset="UTF-8" />
+    <title>Chat Users</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-            .container {
-                width: 900px;
-                /* max-height: 90vh; */
-                max-height: 700px;
-                background-color: #fff;
-                border-radius: 10px;
-                box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-            }
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
 
-            .search-box {
-                padding: 12px;
-                border-bottom: 1px solid #ccc;
-                background-color: #fafafa;
-            }
+        .container {
+            width: 900px;
+            /* max-height: 90vh; */
+            max-height: 700px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-            .search-box input {
-                width: 100%;
-                padding: 10px;
-                border-radius: 25px;
-                border: 1px solid #ddd;
-                outline: none;
-            }
+        .search-box {
+            padding: 12px;
+            border-bottom: 1px solid #ccc;
+            background-color: #fafafa;
+        }
 
-            .user-list {
-                overflow-y: auto;
-                flex: 1;
-            }
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            outline: none;
+        }
 
-            .user {
-                display: flex;
-                align-items: center;
-                padding: 10px 15px;
-                border-bottom: 1px solid #f0f0f0;
-                cursor: pointer;
-                transition: background 0.2s ease;
-            }
+        .user-list {
+            overflow-y: auto;
+            flex: 1;
+        }
 
-            .user:hover {
-                background-color: #f5f5f5;
-            }
+        .user {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
 
-            .user img {
-                width: 45px;
-                height: 45px;
-                border-radius: 50%;
-                margin-right: 15px;
-                object-fit: cover;
-            }
+        .user:hover {
+            background-color: #f5f5f5;
+        }
 
-            .user-info h5 {
-                font-size: 16px;
-                margin-bottom: 4px;
-            }
+        .user img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
 
-            .user-info p {
-                font-size: 13px;
-                color: #888;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                max-width: 250px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="search-box">
-                <input type="text" placeholder="Search Contact" />
-            </div>
+        .user-info h5 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
 
-            <div class="user-list">
-                <% users.forEach(user => { %>
-                <a href="/chat/<%= user._id %>" style="text-decoration: none; color: inherit">
-                    <div class="user">
-                        <img
-                            src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
-                            alt="User Avatar"
-                        />
-                        <div class="user-info">
-                            <h5><%= user.name %></h5>
-                            <p><%= user.lastMessage || 'Tap to chat' %></p>
-                        </div>
-                    </div>
-                </a>
-                <% }) %>
-            </div>
+        .user-info p {
+            font-size: 13px;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 250px;
+        }
+
+        .user-card {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="mb-3 px-3 search-box">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search users by name..." />
         </div>
-    </body>
+
+
+        <div class="user-list" id="userList">
+            <% users.forEach((user, index)=> { %>
+                <div class="user-card" data-name="<%= user.name.toLowerCase() %>" data-index="<%= index %>">
+                    <a href="/api/v1/chat/<%= user._id %>" style="text-decoration: none; color: inherit">
+                        <div class="user">
+                            <img src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>" alt="User Avatar" />
+                            <div class="user-info">
+                                <h5 class="user-name">
+                                    <%= user.name %>
+                                </h5>
+                                <p>
+                                    <%= user.lastMessage || 'Tap to chat' %>
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <% }) %>
+        </div>
+
+    </div>
+    <script>
+        const searchInput = document.getElementById("searchInput");
+        const userList = document.getElementById("userList");
+        const originalUsers = Array.from(userList.children);
+
+        searchInput.addEventListener("input", function () {
+            const query = this.value.trim().toLowerCase();
+
+            // Clone original array to avoid modifying original order
+            let users = [...originalUsers];
+
+            if (query) {
+                // Sort matched users first
+                users.sort((a, b) => {
+                    const nameA = a.dataset.name;
+                    const nameB = b.dataset.name;
+
+                    const includesA = nameA.includes(query);
+                    const includesB = nameB.includes(query);
+
+                    if (includesA && !includesB) return -1;
+                    if (!includesA && includesB) return 1;
+                    return 0;
+                });
+            } else {
+                // Restore original order by index
+                users.sort((a, b) => {
+                    return a.dataset.index - b.dataset.index;
+                });
+            }
+
+            // Clear and re-append users in new order
+            userList.innerHTML = "";
+            users.forEach(card => {
+                const name = card.dataset.name;
+                const nameEl = card.querySelector(".user-name");
+                const originalText = nameEl.textContent;
+
+                if (query && name.includes(query)) {
+                    // Highlight match
+                    const regex = new RegExp(`(${query})`, "gi");
+                    nameEl.innerHTML = originalText.replace(regex, `<span style="background-color: yellow;">$1</span>`);
+                } else {
+                    nameEl.textContent = originalText;
+                }
+
+                userList.appendChild(card);
+            });
+        });
+    </script>
+
+</body>
+
 </html>

@@ -5,4 +5,6 @@ const router = express.Router();
 
 router.get("/", asyncWrap(chatController.usersList));
 
+router.get("/:id", asyncWrap(chatController.userChatById));
+
 export default router;
