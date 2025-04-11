@@ -22,7 +22,7 @@ class chatController {
     }
 
     /**
-     * @description: create Group Chat 
+     * @description: create Group Chat
      * @param {*} req
      * @param {*} res
      */
@@ -31,9 +31,8 @@ class chatController {
         return;
     }
 
-
     /**
-     * @description: Group Chat by ID 
+     * @description: Group Chat by ID
      * @param {*} req
      * @param {*} res
      */

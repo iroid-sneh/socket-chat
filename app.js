@@ -28,7 +28,6 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-// In your Express app setup (e.g., app.js or server.js)
 app.use("/media/files", express.static(path.join(__dirname, "media/files")));
 
 app.use(express.json());
@@ -73,7 +72,6 @@ if (isSecure) {
         );
     });
 } else {
-    // var http = require("http").Server(app);
     server.listen(port, () => {
         console.log(`Listening on port: ${process.env.BASE_URL}:${port}`);
     });

@@ -31,9 +31,9 @@ class authServices {
             const token = generateToken(user._id);
             res.cookie("token", token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production", // Only over HTTPS in production
-                sameSite: "lax", // Or "strict"
-                maxAge: 24 * 60 * 60 * 1000, // 1 day
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 24 * 60 * 60 * 1000,
             });
 
             return res.redirect("/api/v1/chat");
@@ -66,11 +66,10 @@ class authServices {
         const token = generateToken(user._id);
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // Only over HTTPS in production
-            sameSite: "lax", // Or "strict"
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 24 * 60 * 60 * 1000,
         });
-        // console.log("Login successful, redirecting...");
 
         return res.redirect("/api/v1/chat");
     }

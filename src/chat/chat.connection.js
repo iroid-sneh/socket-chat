@@ -1,8 +1,8 @@
-// 🔄 Updated chat.connection.js
 import mongoose from "mongoose";
 import User from "../../models/user";
 import ChatMessages from "../../models/chatMessages";
 import ChatGroup from "../../models/groupChat";
+import GroupMessages from "../../models/groupMessages";
 import { NotFoundException } from "../common/middleware/error-exceptions";
 import { writeFile } from "fs";
 import path from "path";
@@ -55,12 +55,22 @@ io.on("connection", (socket) => {
         if (!message) return;
 
         try {
-            const chatMessage = await new ChatMessages({
-                senderId: sender,
-                receiverId: recipient,
-                message,
-                isGroup,
-            }).save();
+            let chatMessage;
+
+            if (isGroup) {
+                chatMessage = await new GroupMessages({
+                    senderId: sender,
+                    groupId: recipient,
+                    message,
+                }).save();
+            } else {
+                chatMessage = await new ChatMessages({
+                    senderId: sender,
+                    receiverId: recipient,
+                    message,
+                    isGroup,
+                }).save();
+            }
 
             const senderUser = await User.findById(sender);
             const messageToSend = {
@@ -70,6 +80,7 @@ io.on("connection", (socket) => {
 
             if (isGroup) {
                 socket.to(recipient).emit("message", messageToSend);
+                socket.emit("message", messageToSend);
             } else {
                 const recipientSocket = connectedSockets.get(recipient);
                 if (recipientSocket) {
@@ -127,10 +138,9 @@ io.on("connection", (socket) => {
         async ({ sender, recipient, isGroup = false }) => {
             let messages;
             if (isGroup) {
-                messages = await ChatMessages.find({
-                    receiverId: recipient,
-                    isGroup,
-                });
+                messages = await GroupMessages.find({
+                    groupId: recipient,
+                }).sort({ createdAt: 1 });
             } else {
                 messages = await ChatMessages.find({
                     $or: [
@@ -138,7 +148,7 @@ io.on("connection", (socket) => {
                         { senderId: recipient, receiverId: sender },
                     ],
                     isGroup: false,
-                });
+                }).sort({ createdAt: 1 });
             }
             socket.emit("previousMessages", messages);
         }
@@ -219,7 +229,6 @@ io.on("connection", (socket) => {
     //         io.to(memberSocket).emit("groupCreated", group);
     //     }
     // });
-
 });
 
 export default io;

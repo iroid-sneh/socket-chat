@@ -1,323 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Chat Users</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        />
 
-<head>
-    <meta charset="UTF-8" />
-    <title>Chat Users</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Bootstrap JS (for modal functionality) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
 
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+        <link
+            href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
 
-    <!-- new bootstrap.Modal(document.getElementById('createGroupModal')).show();
- -->
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        }
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet"
+        />
 
-        body {
-            background-color: #f0f2f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
 
-        .container {
-            width: 900px;
-            max-height: 700px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+            body {
+                background-color: #f0f2f5;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+            }
 
-        .search-box {
-            padding: 12px;
-            border-bottom: 1px solid #ccc;
-            background-color: #fafafa;
-        }
+            .container {
+                width: 900px;
+                max-height: 700px;
+                background-color: #fff;
+                border-radius: 10px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
 
-        .search-box input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 25px;
-            border: 1px solid #ddd;
-            outline: none;
-        }
+            .search-box {
+                padding: 12px;
+                border-bottom: 1px solid #ccc;
+                background-color: #fafafa;
+            }
 
-        .user-list {
-            overflow-y: auto;
-            flex: 1;
-        }
+            .search-box input {
+                width: 100%;
+                padding: 10px;
+                border-radius: 25px;
+                border: 1px solid #ddd;
+                outline: none;
+            }
 
-        .user {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
+            .user-list {
+                overflow-y: auto;
+                flex: 1;
+            }
 
-        .user:hover {
-            background-color: #f5f5f5;
-        }
+            .user {
+                display: flex;
+                align-items: center;
+                padding: 10px 15px;
+                border-bottom: 1px solid #f0f0f0;
+                cursor: pointer;
+                transition: background 0.2s ease;
+            }
 
-        .user img {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            margin-right: 15px;
-            object-fit: cover;
-        }
+            .user:hover {
+                background-color: #f5f5f5;
+            }
 
-        .user-info h5 {
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
+            .user img {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                margin-right: 15px;
+                object-fit: cover;
+            }
 
-        .user-info p {
-            font-size: 13px;
-            color: #888;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 250px;
-        }
+            .user-info h5 {
+                font-size: 16px;
+                margin-bottom: 4px;
+            }
 
-        .user-card {
-            transition: all 0.3s ease;
-        }
+            .user-info p {
+                font-size: 13px;
+                color: #888;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 250px;
+            }
 
-        #createGroupBtn:hover {
-            background-color: #165cbd;
-        }
+            .user-card {
+                transition: all 0.3s ease;
+            }
 
-        .btn-circle {
-            width: 40px;
-            height: 40px;
-            padding: 6px 0;
-            border-radius: 50%;
-            text-align: center;
-            font-size: 16px;
-            line-height: 1.42857;
-        }
+            #createGroupBtn:hover {
+                background-color: #165cbd;
+            }
 
-        .selectable-user {
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+            .btn-circle {
+                width: 40px;
+                height: 40px;
+                padding: 6px 0;
+                border-radius: 50%;
+                text-align: center;
+                font-size: 16px;
+                line-height: 1.42857;
+            }
 
-        .selectable-user:hover {
-            background-color: #e7f1ff;
-        }
-    </style>
-</head>
+            .selectable-user {
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
 
-<body>
-    <input type="hidden" id="currentUserId" value="<%= senderId %>" />
+            .selectable-user:hover {
+                background-color: #e7f1ff;
+            }
+        </style>
+    </head>
 
-    <div class="container">
-        <!-- Create Group Button -->
-        <div class="mb-3 px-3 search-box" style="display: flex; align-items: center; gap: 10px;">
-            <input type="text" id="searchInput" placeholder="Search by name..." style="flex: 1;" />
-            <button id="createGroupBtn" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#createGroupModal"
-                title="Create Group"
-                style="width: 45px; height: 45px; background-color: #5f76e8; color: white; border: none; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-users"></i>
-            </button>
+    <body>
+        <input type="hidden" id="currentUserId" value="<%= senderId %>" />
 
-        </div>
+        <div class="container">
+            <div class="mb-3 px-3 search-box" style="display: flex; align-items: center; gap: 10px">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search by name..."
+                    style="flex: 1"
+                />
+                <button
+                    id="createGroupBtn"
+                    class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                    data-bs-toggle="modal"
+                    data-bs-target="#createGroupModal"
+                    title="Create Group"
+                    style="
+                        width: 45px;
+                        height: 45px;
+                        background-color: #5f76e8;
+                        color: white;
+                        border: none;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    "
+                >
+                    <i class="fas fa-users"></i>
+                </button>
+            </div>
 
-        <!-- User List -->
-        <div class="user-list" id="userList">
-            <% users.forEach((user, index)=> { %>
-                <div class="user-card" data-name="<%= user.name.toLowerCase() %>" data-index="<%= index %>">
-                    <a href="/api/v1/chat/<%= user._id %>" style="text-decoration: none; color: inherit">
+            <div class="user-list" id="userList">
+                <% users.forEach((user, index)=> { %>
+                <div
+                    class="user-card"
+                    data-name="<%= user.name.toLowerCase() %>"
+                    data-index="<%= index %>"
+                >
+                    <a
+                        href="/api/v1/chat/<%= user._id %>"
+                        style="text-decoration: none; color: inherit"
+                    >
                         <div class="user">
-                            <img src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>" alt="User Avatar" />
+                            <img
+                                src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
+                                alt="User Avatar"
+                            />
                             <div class="user-info">
-                                <h5 class="user-name">
-                                    <%= user.name %>
-                                </h5>
-                                <p>
-                                    <%= user.lastMessage || 'Tap to chat' %>
-                                </p>
+                                <h5 class="user-name"><%= user.name %></h5>
+                                <p><%= user.lastMessage || 'Tap to chat' %></p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <% }) %> <% groups.forEach((group, index)=> { %>
+                <div
+                    class="user-card"
+                    data-name="<%= group.name.toLowerCase() %>"
+                    data-index="g<%= index %>"
+                >
+                    <a
+                        href="/api/v1/chat/group/<%= group._id %>"
+                        style="text-decoration: none; color: inherit"
+                    >
+                        <div class="user">
+                            <img src="/assets/images/background/group-img.jpg" alt="Group Icon" />
+                            <div class="user-info">
+                                <h5 class="user-name"><%= group.name %></h5>
+                                <p>Group Chat</p>
                             </div>
                         </div>
                     </a>
                 </div>
                 <% }) %>
-                    <% groups.forEach((group, index)=> { %>
-                        <div class="user-card" data-name="<%= group.name.toLowerCase() %>" data-index="g<%= index %>">
-                            <a href="/api/v1/chat/group/<%= group._id %>" style="text-decoration: none; color: inherit">
-                                <div class="user">
-                                    <img src="/public/assets/images/background/group-img.jpg" alt="Group Icon" />
-                                    <div class="user-info">
-                                        <h5 class="user-name">
-                                            <%= group.name %>
-                                        </h5>
-                                        <p>Group Chat</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <% }) %>
-        </div>
+            </div>
 
-        <!-- Create Group Modal -->
-        <div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createGroupModalLabel">Create New Group</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="createGroupForm">
-                            <div class="mb-3">
-                                <label for="groupName" class="form-label">Group Name</label>
-                                <input type="text" class="form-control" id="groupName" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Select Members</label>
-                                <div id="groupUserList" class="d-flex flex-column"
-                                    style="max-height: 200px; overflow-y: auto;">
-                                    <div id="groupUserList" class="d-flex flex-column gap-2">
-                                        <% users.forEach(user=> { %>
-                                            <div class="user selectable-user p-2 d-flex align-items-center border rounded"
-                                                data-user-id="<%= user._id %>">
-                                                <img src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
+            <div
+                class="modal fade"
+                id="createGroupModal"
+                tabindex="-1"
+                aria-labelledby="createGroupModalLabel"
+                aria-hidden="true"
+            >
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createGroupModalLabel">Create New Group</h5>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            ></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="createGroupForm">
+                                <div class="mb-3">
+                                    <label for="groupName" class="form-label">Group Name</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="groupName"
+                                        required
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Select Members</label>
+                                    <div
+                                        id="groupUserList"
+                                        class="d-flex flex-column"
+                                        style="max-height: 200px; overflow-y: auto"
+                                    >
+                                        <div id="groupUserList" class="d-flex flex-column gap-2">
+                                            <% users.forEach(user=> { %>
+                                            <div
+                                                class="user selectable-user p-2 d-flex align-items-center border rounded"
+                                                data-user-id="<%= user._id %>"
+                                            >
+                                                <img
+                                                    src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
                                                     alt="Avatar"
-                                                    style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
-                                                <span>
-                                                    <%= user.name %>
-                                                </span>
+                                                    style="
+                                                        width: 40px;
+                                                        height: 40px;
+                                                        border-radius: 50%;
+                                                        object-fit: cover;
+                                                        margin-right: 10px;
+                                                    "
+                                                />
+                                                <span><%= user.name %></span>
                                             </div>
                                             <% }) %>
+                                        </div>
                                     </div>
-
                                 </div>
-                            </div>
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-success">Create</button>
-                            </div>
-                        </form>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-success">Create</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-    </div>
-
-    <!-- Search & Group Form Script -->
-    <script>
-        const senderId = document.getElementById("currentUserId").value;
-
-        const searchInput = document.getElementById("searchInput");
-        const userList = document.getElementById("userList");
-        const originalUsers = Array.from(userList.children);
-
-        searchInput.addEventListener("input", function () {
-            const query = this.value.trim().toLowerCase();
-            let users = [...originalUsers];
-
-            if (query) {
-                users.sort((a, b) => {
-                    const nameA = a.dataset.name;
-                    const nameB = b.dataset.name;
-                    const includesA = nameA.includes(query);
-                    const includesB = nameB.includes(query);
-                    if (includesA && !includesB) return -1;
-                    if (!includesA && includesB) return 1;
-                    return 0;
-                });
-            } else {
-                users.sort((a, b) => a.dataset.index - b.dataset.index);
-            }
-
-            userList.innerHTML = "";
-            users.forEach(card => {
-                const name = card.dataset.name;
-                const nameEl = card.querySelector(".user-name");
-                const originalText = nameEl.textContent;
-
-                if (query && name.includes(query)) {
-                    const regex = new RegExp(`(${query})`, "gi");
-                    nameEl.innerHTML = originalText.replace(regex, `<span style="background-color: yellow;">$1</span>`);
-                } else {
-                    nameEl.textContent = originalText;
-                }
-
-                userList.appendChild(card);
-            });
-        });
-
-        document.getElementById("createGroupForm").addEventListener("submit", async function (e) {
-            e.preventDefault();
-
-            const name = document.getElementById("groupName").value;
+        <script>
             const senderId = document.getElementById("currentUserId").value;
 
-            if (!name || selectedUserIds.size === 0) {
-                alert("Please enter a group name and select at least one member.");
-                return;
-            }
+            const searchInput = document.getElementById("searchInput");
+            const userList = document.getElementById("userList");
+            const originalUsers = Array.from(userList.children);
 
-            const members = [...selectedUserIds];
-            members.push(senderId); // include the creator
+            searchInput.addEventListener("input", function () {
+                const query = this.value.trim().toLowerCase();
+                let users = [...originalUsers];
 
-            try {
-                const res = await fetch("/api/v1/chat/group", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ name, members })
+                if (query) {
+                    users.sort((a, b) => {
+                        const nameA = a.dataset.name;
+                        const nameB = b.dataset.name;
+                        const includesA = nameA.includes(query);
+                        const includesB = nameB.includes(query);
+                        if (includesA && !includesB) return -1;
+                        if (!includesA && includesB) return 1;
+                        return 0;
+                    });
+                } else {
+                    users.sort((a, b) => a.dataset.index - b.dataset.index);
+                }
+
+                userList.innerHTML = "";
+                users.forEach((card) => {
+                    const name = card.dataset.name;
+                    const nameEl = card.querySelector(".user-name");
+                    const originalText = nameEl.textContent;
+
+                    if (query && name.includes(query)) {
+                        const regex = new RegExp(`(${query})`, "gi");
+                        nameEl.innerHTML = originalText.replace(
+                            regex,
+                            `<span style="background-color: yellow;">$1</span>`
+                        );
+                    } else {
+                        nameEl.textContent = originalText;
+                    }
+
+                    userList.appendChild(card);
+                });
+            });
+
+            document
+                .getElementById("createGroupForm")
+                .addEventListener("submit", async function (e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById("groupName").value;
+                    const senderId = document.getElementById("currentUserId").value;
+
+                    if (!name || selectedUserIds.size === 0) {
+                        alert("Please enter a group name and select at least one member.");
+                        return;
+                    }
+
+                    const members = [...selectedUserIds];
+                    members.push(senderId);
+
+                    try {
+                        const res = await fetch("/api/v1/chat/group", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ name, members }),
+                        });
+
+                        const data = await res.json();
+                        if (data.success) {
+                            window.location.href = `/api/v1/chat/group/${data.groupId}`;
+                        } else {
+                            alert(data.message || "Failed to create group.");
+                        }
+                    } catch (err) {
+                        console.error("Group creation failed:", err);
+                        alert("An error occurred.");
+                    }
                 });
 
-                const data = await res.json();
-                if (data.success) {
-                    window.location.href = `/api/v1/chat/group/${data.groupId}`;
-                } else {
-                    alert(data.message || "Failed to create group.");
-                }
-            } catch (err) {
-                console.error("Group creation failed:", err);
-                alert("An error occurred.");
-            }
-        });
+            const selectedUserIds = new Set();
 
-        const selectedUserIds = new Set();
-
-        document.querySelectorAll('.selectable-user').forEach(userEl => {
-            userEl.addEventListener('click', () => {
-                const userId = userEl.dataset.userId;
-                if (selectedUserIds.has(userId)) {
-                    selectedUserIds.delete(userId);
-                    userEl.classList.remove('bg-success-subtle', 'text-black');
-                } else {
-                    selectedUserIds.add(userId);
-                    userEl.classList.add('bg-success-subtle', 'text-black');
-                }
+            document.querySelectorAll(".selectable-user").forEach((userEl) => {
+                userEl.addEventListener("click", () => {
+                    const userId = userEl.dataset.userId;
+                    if (selectedUserIds.has(userId)) {
+                        selectedUserIds.delete(userId);
+                        userEl.classList.remove("bg-success-subtle", "text-black");
+                    } else {
+                        selectedUserIds.add(userId);
+                        userEl.classList.add("bg-success-subtle", "text-black");
+                    }
+                });
             });
-        });
-    </script>
-</body>
-
+        </script>
+    </body>
 </html>
