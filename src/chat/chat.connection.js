@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 import User from "../../models/user";
 import ChatMessages from "../../models/chatMessages";
+import ChatGroup from "../../models/groupChat";
 import { NotFoundException } from "../common/middleware/error-exceptions";
 import { writeFile } from "fs";
 import path from "path";
@@ -24,13 +25,26 @@ io.on("connection", (socket) => {
         const user = await User.findById(userId);
         if (!user) throw new NotFoundException("User not found");
 
-        connectedSockets.set(userId, socket.id); // ✅ only store socket.id
+        connectedSockets.set(userId, socket.id);
         connectedUsers.add(userId);
 
-        socket.join(userId); // private messages
+        // Join private room
+        socket.join(userId);
+
+        // Join group rooms from DB
+        const userGroups = await ChatGroup.find({ members: userId });
+        userGroups.forEach((group) => socket.join(group._id.toString()));
+
+        // Join any extra provided rooms (optional)
         chatRoomIds.forEach((room) => socket.join(room));
 
-        io.emit("userStatus", Array.from(connectedUsers));
+        // Notify everyone about this user's online status
+        io.emit("userStatus", {
+            userId,
+            isOnline: true,
+        });
+
+        socket.emit("onlineUsers", Array.from(connectedUsers));
     });
 
     //-------------------------------------------------------/
@@ -140,7 +154,10 @@ io.on("connection", (socket) => {
         if (user) {
             connectedSockets.delete(user);
             connectedUsers.delete(user);
-            io.emit("userStatus", Array.from(connectedUsers));
+            io.emit("userStatus", {
+                userId: user,
+                isOnline: false,
+            });
         }
     });
 
@@ -187,6 +204,22 @@ io.on("connection", (socket) => {
             io.to(recipientSocketId).emit("message", messageToSend);
         });
     });
+
+    // Online Status
+    socket.on("userStatus", ({ userId, isOnline }) => {
+        const dot = document.getElementById("onlineStatusDot");
+        if (recipientId === userId && dot) {
+            dot.style.backgroundColor = isOnline ? "limegreen" : "gray";
+        }
+    });
+
+    // members.forEach((memberId) => {
+    //     const memberSocket = connectedSockets.get(memberId);
+    //     if (memberSocket) {
+    //         io.to(memberSocket).emit("groupCreated", group);
+    //     }
+    // });
+
 });
 
 export default io;

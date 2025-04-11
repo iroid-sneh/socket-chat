@@ -1,5 +1,6 @@
 import User from "../../models/user";
 import ChatMessages from "../../models/chatMessages";
+import ChatGroup from "../../models/groupChat"
 import mongoose from "mongoose";
 
 class chatService {
@@ -9,10 +10,12 @@ class chatService {
      * @param {*} res
      */
     static async usersList(req, res) {
-        // console.log("Chat page accessed");
-        // console.log("Authenticated User in Chat:", req.user);
 
         const currentUserId = new mongoose.Types.ObjectId(req.user._id); // or however you're storing user
+        // Inside chatService.usersList
+        const groups = await ChatGroup.find({ members: currentUserId });
+        // console.log("Groups found for user:", groups);
+
 
         try {
             // Step 1: Get all users (exclude self)
@@ -37,7 +40,7 @@ class chatService {
                 })
             );
 
-            res.render("users", { users: usersWithLastMessages }); // Your EJS page
+            res.render("users", { users: usersWithLastMessages, senderId: currentUserId, groups }); // Your EJS page
         } catch (err) {
             console.error(err);
             res.status(500).send("Internal Server Error");
@@ -55,6 +58,7 @@ class chatService {
         const recipientId = id;
 
         const recipient = await User.findById(recipientId);
+        const groups = await ChatGroup.find({ members: sender._id });
 
         // Get messages between these users
         const messages = await ChatMessages.find({
@@ -77,8 +81,60 @@ class chatService {
             recipientImage: recipient.image,
             users,
             initialMessages: messages, // Pass messages to the view
+            groups
         });
     }
+
+    /**
+     * @description: Create Group Chat
+     * @param {*} req
+     * @param {*} res
+     */
+    static async createGroup(req, res) {
+        const { name, members, admin } = req.body;
+
+        if (!name || !members || members.length < 2) {
+            return res.status(400).json({ message: "Group name & at least 2 members required." });
+        }
+
+        const group = await ChatGroup.create({
+            name,
+            members,
+            admin,
+        });
+
+        // Redirect to group chat page
+        res.status(200).json({ success: true, groupId: group._id });
+    }
+
+
+    /**
+     * @description: Group Chat by Id
+     * @param {*} req
+     * @param {*} res
+     */
+    static async groupChatById(id, req, res) {
+        const group = await ChatGroup.findById(id)
+            .populate("members", "name image")
+            .populate("admin", "name");
+
+        if (!group) return res.status(404).send("Group not found");
+
+        const users = await User.find({ _id: { $ne: req.user._id } });
+
+        res.render("chat", {
+            senderId: req.user._id,
+            recipientId: group._id,
+            senderName: req.user.name,
+            recipientName: group.name,
+            recipientImage: "/assets/group.png", // Default group avatar
+            users,
+            initialMessages: [], // Load later with socket/messages model
+            isGroup: true,
+            groupMembers: group.members,
+        });
+    }
+
 }
 
 export default chatService;
