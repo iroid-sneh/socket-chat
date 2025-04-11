@@ -1,8 +1,8 @@
 const socket = io();
+socket.emit("join", { userId: senderId });
 
 const fileInput = document.getElementById("fileInput");
 const selectedFileName = document.getElementById("selectedFileName");
-const messageInput = document.getElementById("textarea1");
 const sendBtn = document.getElementById("sendBtn");
 
 const senderId = document.getElementById("currentUserId").value;
@@ -10,12 +10,9 @@ const recipientId = document.getElementById("recipientUserId").value;
 const chatInput = document.getElementById("textarea1");
 const isGroupChat = document.getElementById("isGroup")?.value === "true";
 
-socket.emit("join", { userId: senderId });
-
 const chatBox = document.querySelector(".chat-box");
 let lastMessageId = null;
 
-// Send Message
 $("#textarea1").keypress(function (e) {
     if (e.keyCode === 13 && !e.shiftKey) {
         e.preventDefault();
@@ -29,7 +26,6 @@ $("#textarea1").keypress(function (e) {
             });
             $(this).val("");
 
-            // Emit stopTyping when user sends a message
             socket.emit("stopTyping", {
                 sender: senderId,
                 recipient: recipientId,
@@ -39,7 +35,6 @@ $("#textarea1").keypress(function (e) {
     }
 });
 
-// Receive message
 socket.on("message", (msg) => {
     const isSelf = msg.senderId === senderId;
     const alignment = isSelf ? "odd text-end" : "";
@@ -86,7 +81,6 @@ socket.on("message", (msg) => {
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// Switch recipient
 function setRecipient(id, name) {
     document.getElementById("recipientUserId").value = id;
     $("#chat-list").html("");
@@ -102,7 +96,6 @@ const typingStatus = document.getElementById("typing-status");
 let typingTimeout;
 let isTyping = false;
 
-// Emit typing event when input is changing
 chatInput.addEventListener("input", () => {
     if (!isTyping) {
         socket.emit("typing", { sender: senderId, recipient: recipientId });
@@ -113,13 +106,11 @@ chatInput.addEventListener("input", () => {
     typingTimeout = setTimeout(() => {
         socket.emit("stopTyping", { sender: senderId, recipient: recipientId });
         isTyping = false;
-    }, 2000); // 2 seconds idle time
+    }, 2000);
 });
 
-// Show typing status
 socket.on("typing", ({ sender }) => {
     if (sender === recipientId) {
-        // Only add if not already present
         if (!document.getElementById("typing-indicator")) {
             const typingBubble = document.createElement("li");
             typingBubble.id = "typing-indicator";
@@ -151,13 +142,13 @@ fileInput.addEventListener("change", async (e) => {
     if (!file) return;
 
     const arrayBuffer = await file.arrayBuffer();
-    const fileBuffer = new Uint8Array(arrayBuffer); // Convert to Uint8Array
+    const fileBuffer = new Uint8Array(arrayBuffer);
 
     socket.emit("file", {
         sender: senderId,
         recipient: recipientId,
         fileName: file.name,
-        fileBuffer: [...fileBuffer], // Convert to regular array
+        fileBuffer: [...fileBuffer],
     });
     e.target.value = "";
     selectedFileName.textContent = "";

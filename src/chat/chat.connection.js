@@ -12,8 +12,8 @@ const io = require("socket.io")({
     maxHttpBufferSize: 1e8,
 });
 
-const connectedSockets = new Map(); // userId => socket
-const connectedUsers = new Set(); // track online userIds
+const connectedSockets = new Map();
+const connectedUsers = new Set();
 
 //-------------------------------------------------------/
 // socket for connection
@@ -28,17 +28,13 @@ io.on("connection", (socket) => {
         connectedSockets.set(userId, socket.id);
         connectedUsers.add(userId);
 
-        // Join private room
         socket.join(userId);
 
-        // Join group rooms from DB
         const userGroups = await ChatGroup.find({ members: userId });
         userGroups.forEach((group) => socket.join(group._id.toString()));
 
-        // Join any extra provided rooms (optional)
         chatRoomIds.forEach((room) => socket.join(room));
 
-        // Notify everyone about this user's online status
         io.emit("userStatus", {
             userId,
             isOnline: true,
@@ -86,27 +82,15 @@ io.on("connection", (socket) => {
                 if (recipientSocket) {
                     io.to(recipientSocket).emit("message", messageToSend);
                 }
-                socket.emit("message", messageToSend); // Send back to sender too
+                socket.emit("message", messageToSend);
             }
         } catch (error) {
             console.error("Error handling message:", error);
         }
     });
     //-------------------------------------------------------/
-    // Seen status handling
-    //-------------------------------------------------------/
-    socket.on("seen", async ({ messageId, userId }) => {
-        await ChatMessages.findByIdAndUpdate(messageId, {
-            $addToSet: { seenBy: userId },
-        });
-
-        io.emit("seen", { messageId, userId });
-    });
-
-    //-------------------------------------------------------/
     // Typing indicator
     //-------------------------------------------------------/
-    // Typing indicator
     socket.on("typing", ({ sender, recipient, isGroup = false }) => {
         if (isGroup) {
             socket.to(recipient).emit("typing", { sender });
@@ -118,7 +102,6 @@ io.on("connection", (socket) => {
         }
     });
 
-    // Stop typing indicator
     socket.on("stopTyping", ({ sender, recipient, isGroup = false }) => {
         if (isGroup) {
             socket.to(recipient).emit("stopTyping", { sender });
@@ -193,7 +176,6 @@ io.on("connection", (socket) => {
                 return;
             }
 
-            // Save to DB
             const chatMessage = await new ChatMessages({
                 senderId: sender,
                 receiverId: recipient,
@@ -209,26 +191,17 @@ io.on("connection", (socket) => {
                 isVideo,
             };
 
-            // Emit to both parties
             socket.emit("message", messageToSend);
             io.to(recipientSocketId).emit("message", messageToSend);
         });
     });
 
-    // Online Status
     socket.on("userStatus", ({ userId, isOnline }) => {
         const dot = document.getElementById("onlineStatusDot");
         if (recipientId === userId && dot) {
             dot.style.backgroundColor = isOnline ? "limegreen" : "gray";
         }
     });
-
-    // members.forEach((memberId) => {
-    //     const memberSocket = connectedSockets.get(memberId);
-    //     if (memberSocket) {
-    //         io.to(memberSocket).emit("groupCreated", group);
-    //     }
-    // });
 });
 
 export default io;
