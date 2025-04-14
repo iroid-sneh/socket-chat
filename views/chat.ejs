@@ -92,7 +92,7 @@
                                                 <li>
                                                     <div class="message-center">
                                                         <div id="user-list">
-                                                            <% users.forEach(user=> { %>
+                                                            <% users.forEach(user => { %>
                                                             <div
                                                                 class="user-card"
                                                                 data-name="<%= user.name.toLowerCase() %>"
@@ -131,8 +131,8 @@
                                                                 </a>
                                                             </div>
                                                             <% }) %> <% if (sideGroup &&
-                                                            sideGroup.length> 0) { %> <%
-                                                            sideGroup.forEach((group, index)=> { %>
+                                                            sideGroup.length > 0) { %> <%
+                                                            sideGroup.forEach((group, index) => { %>
                                                             <div
                                                                 class="user-card"
                                                                 data-name="<%= group.name.toLowerCase() %>"
@@ -178,7 +178,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Chat Area -->
                                     <div class="col-lg-9 col-xl-10">
                                         <div
                                             class="chat-box scrollable position-relative"
@@ -224,7 +223,6 @@
                                                     </h5>
                                                 </div>
 
-                                                <!-- Typing status -->
                                                 <div
                                                     id="typing-status"
                                                     style="
@@ -233,12 +231,10 @@
                                                         display: none;
                                                     "
                                                 ></div>
-                                                <!-- Messages will appear here -->
                                             </ul>
                                         </div>
 
                                         <div class="card-body border-top">
-                                            <!-- Selected file display -->
                                             <div
                                                 id="selectedFileName"
                                                 class="text-muted mb-1"
@@ -281,84 +277,77 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- End of Chat Area -->
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Create Group Modal -->
-            <div
-                class="modal fade"
-                id="createGroupModal"
-                tabindex="-1"
-                aria-labelledby="createGroupModalLabel"
-                aria-hidden="true"
-            >
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold" id="createGroupModalLabel">
-                                Create New Group
-                            </h5>
-                            <button
-                                type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                            ></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="createGroupForm">
-                                <div class="mb-3">
-                                    <label for="groupName" class="form-label">Group Name</label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="groupName"
-                                        placeholder="Enter group name"
-                                        required
-                                    />
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Select Members</label>
+        // Create Group Modal
+        <div
+            class="modal fade"
+            id="createGroupModal"
+            tabindex="-1"
+            aria-labelledby="createGroupModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="createGroupModalLabel">
+                            Create New Group
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createGroupForm">
+                            <div class="mb-3">
+                                <label for="groupName" class="form-label">Group Name</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="groupName"
+                                    placeholder="Enter group name"
+                                    required
+                                />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Select Members</label>
+                                <div
+                                    id="groupUserList"
+                                    class="d-flex flex-column gap-2"
+                                    style="max-height: 250px; overflow-y: auto"
+                                >
+                                    <% usersForGroup.forEach(user=> { %>
                                     <div
-                                        id="groupUserList"
-                                        class="d-flex flex-column gap-2"
-                                        style="max-height: 250px; overflow-y: auto"
+                                        class="user d-flex align-items-center px-2 py-1 rounded border"
+                                        style="cursor: pointer"
+                                        onclick="toggleUserSelection('<%= user._id %>')"
                                     >
-                                        <% usersForGroup.forEach(user=> { %>
-                                        <div
-                                            class="user d-flex align-items-center px-2 py-1 rounded border"
-                                            style="cursor: pointer"
-                                            onclick="toggleUserSelection('<%= user._id %>')"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                name="groupMembers"
-                                                value="<%= user._id %>"
-                                                id="user_<%= user._id %>"
-                                                class="form-check-input me-2 d-none"
-                                            />
-                                            <img
-                                                src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
-                                                class="rounded-circle me-2"
-                                                width="40"
-                                                height="40"
-                                            />
-                                            <span><%= user.name %></span>
-                                        </div>
-                                        <% }); %>
+                                        <input
+                                            type="checkbox"
+                                            name="groupMembers"
+                                            value="<%= user._id %>"
+                                            id="user_<%= user._id %>"
+                                            class="form-check-input me-2 d-none"
+                                        />
+                                        <img
+                                            src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
+                                            class="rounded-circle me-2"
+                                            width="40"
+                                            height="40"
+                                        />
+                                        <span><%= user.name %></span>
                                     </div>
+                                    <% }); %>
                                 </div>
-                                <div class="text-end">
-                                    <button type="submit" class="btn btn-success">
-                                        Create Group
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-success">Create Group</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -428,25 +417,20 @@
         <script src="/assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
         <script src="/dist/js/sidebarmenu.js"></script>
         <script src="/dist/js/custom.min.js"></script>
-
         <script>
             const socket = io();
-
-            const fileInput = document.getElementById("fileInput");
-            const selectedFileName = document.getElementById("selectedFileName");
-            const sendBtn = document.getElementById("sendBtn");
 
             const senderId = document.getElementById("currentUserId").value;
             const recipientId = document.getElementById("recipientUserId").value;
             const chatInput = document.getElementById("textarea1");
+            const chatBox = document.querySelector(".chat-box");
             const isGroupChat = document.getElementById("isGroup")?.value === "true";
+            const fileInput = document.getElementById("fileInput");
+            const selectedFileName = document.getElementById("selectedFileName");
+            const sendBtn = document.getElementById("sendBtn");
 
             socket.emit("join", { userId: senderId });
 
-            const chatBox = document.querySelector(".chat-box");
-            let lastMessageId = null;
-
-            // Send Message
             $("#textarea1").keypress(function (e) {
                 if (e.keyCode === 13 && !e.shiftKey) {
                     e.preventDefault();
@@ -460,14 +444,15 @@
                         });
                         $(this).val("");
 
-                        // Emit stopTyping when user sends a message
-                        socket.emit("stopTyping", { sender: senderId, recipient: recipientId });
+                        socket.emit("stopTyping", {
+                            sender: senderId,
+                            recipient: recipientId,
+                        });
                         isTyping = false;
                     }
                 }
             });
 
-            // Receive message
             socket.on("message", (msg) => {
                 const isSelf = msg.senderId === senderId;
                 const alignment = isSelf ? "odd text-end" : "";
@@ -489,48 +474,49 @@
                     content = msg.message;
                 }
 
-                const nameTag =
-                    !isSelf && msg.senderName
-                        ? `<div class="fw-semibold mb-1">${msg.senderName}</div>`
-                        : "";
+                let nameTag = "";
+                if (isGroupChat && !isSelf && msg.senderName) {
+                    nameTag = `<div class="fw-semibold mb-1">${msg.senderName}</div>`;
+                }
 
                 const chatItem = `
-    <li class="chat-item ${alignment} list-style-none mt-3">
-        <div class="chat-content d-inline-block ps-3">
-            ${nameTag}
-            <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
-                ${content}
-            </div>
-        </div>
-        <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
-            ${new Date(msg.createdAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-            })}
-        </div>
-    </li>`;
+                        <li class="chat-item ${alignment} list-style-none mt-3">
+                            <div class="chat-content d-inline-block ps-3">
+                                                ${nameTag}
+                                <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
+                                        ${content}
+                                </div>
+                            </div>
+                            <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
+                                ${new Date(msg.createdAt).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </div>
+                        </li>`;
 
                 $("#chat-list").append(chatItem);
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
 
-            // Switch recipient
             function setRecipient(id, name) {
                 document.getElementById("recipientUserId").value = id;
                 $("#chat-list").html("");
-
-                socket.emit("loadMessages", {
-                    sender: senderId,
-                    recipient: id,
-                    isGroup: false,
-                });
             }
+
+            socket.on("onlineUsers", (onlineUserIds) => {
+                const dot = document.getElementById("onlineStatusDot");
+                if (onlineUserIds.includes(recipientId)) {
+                    dot.style.backgroundColor = "limegreen";
+                } else {
+                    dot.style.backgroundColor = "gray";
+                }
+            });
 
             const typingStatus = document.getElementById("typing-status");
             let typingTimeout;
             let isTyping = false;
 
-            // Emit typing event when input is changing
             chatInput.addEventListener("input", () => {
                 if (!isTyping) {
                     socket.emit("typing", { sender: senderId, recipient: recipientId });
@@ -541,25 +527,23 @@
                 typingTimeout = setTimeout(() => {
                     socket.emit("stopTyping", { sender: senderId, recipient: recipientId });
                     isTyping = false;
-                }, 2000); // 2 seconds idle time
+                }, 2000);
             });
 
-            // Show typing status
             socket.on("typing", ({ sender }) => {
                 if (sender === recipientId) {
-                    // Only add if not already present
                     if (!document.getElementById("typing-indicator")) {
                         const typingBubble = document.createElement("li");
                         typingBubble.id = "typing-indicator";
                         typingBubble.className = "chat-item list-style-none mt-3";
 
                         typingBubble.innerHTML = `
-                                  <div class="chat-content d-inline-block ps-3">
-                                      <div class="box msg p-2 d-inline-block mb-1 bg-light rounded">
-                                          <i>Typing...</i>
-                                      </div>
-                                  </div>
-                              `;
+                      <div class="chat-content d-inline-block ps-3">
+                          <div class="box msg p-2 d-inline-block mb-1 bg-light rounded">
+                              <i>Typing...</i>
+                          </div>
+                      </div>
+                  `;
 
                         document.getElementById("chat-list").appendChild(typingBubble);
                         chatBox.scrollTop = chatBox.scrollHeight;
@@ -579,26 +563,17 @@
                 if (!file) return;
 
                 const arrayBuffer = await file.arrayBuffer();
-                const fileBuffer = new Uint8Array(arrayBuffer); // Convert to Uint8Array
+                const fileBuffer = new Uint8Array(arrayBuffer);
 
                 socket.emit("file", {
                     sender: senderId,
                     recipient: recipientId,
                     fileName: file.name,
-                    fileBuffer: [...fileBuffer], // Convert to regular array
+                    fileBuffer: [...fileBuffer],
                 });
                 e.target.value = "";
                 selectedFileName.textContent = "";
                 selectedFileName.style.display = "none";
-            });
-
-            socket.on("onlineUsers", (onlineUserIds) => {
-                const dot = document.getElementById("onlineStatusDot");
-                if (onlineUserIds.includes(recipientId)) {
-                    dot.style.backgroundColor = "limegreen";
-                } else {
-                    dot.style.backgroundColor = "gray";
-                }
             });
 
             function toggleUserSelection(userId) {

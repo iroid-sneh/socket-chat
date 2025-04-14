@@ -19,7 +19,7 @@ const connectedUsers = new Set();
 // socket for connection
 //-------------------------------------------------------/
 io.on("connection", (socket) => {
-    socket.on("join", async ({ userId, chatRoomIds = [] }) => {
+    socket.on("join", async ({ userId }) => {
         if (!mongoose.Types.ObjectId.isValid(userId)) return;
 
         const user = await User.findById(userId);
@@ -32,13 +32,6 @@ io.on("connection", (socket) => {
 
         const userGroups = await ChatGroup.find({ members: userId });
         userGroups.forEach((group) => socket.join(group._id.toString()));
-
-        chatRoomIds.forEach((room) => socket.join(room));
-
-        io.emit("userStatus", {
-            userId,
-            isOnline: true,
-        });
 
         socket.emit("onlineUsers", Array.from(connectedUsers));
     });
@@ -88,6 +81,7 @@ io.on("connection", (socket) => {
             console.error("Error handling message:", error);
         }
     });
+
     //-------------------------------------------------------/
     // Typing indicator
     //-------------------------------------------------------/
@@ -101,7 +95,6 @@ io.on("connection", (socket) => {
             }
         }
     });
-
     socket.on("stopTyping", ({ sender, recipient, isGroup = false }) => {
         if (isGroup) {
             socket.to(recipient).emit("stopTyping", { sender });
@@ -110,47 +103,6 @@ io.on("connection", (socket) => {
             if (recipientSocket) {
                 io.to(recipientSocket).emit("stopTyping", { sender });
             }
-        }
-    });
-
-    //-------------------------------------------------------/
-    // Load chat history
-    //-------------------------------------------------------/
-    socket.on(
-        "loadMessages",
-        async ({ sender, recipient, isGroup = false }) => {
-            let messages;
-            if (isGroup) {
-                messages = await GroupMessages.find({
-                    groupId: recipient,
-                }).sort({ createdAt: 1 });
-            } else {
-                messages = await ChatMessages.find({
-                    $or: [
-                        { senderId: sender, receiverId: recipient },
-                        { senderId: recipient, receiverId: sender },
-                    ],
-                    isGroup: false,
-                }).sort({ createdAt: 1 });
-            }
-            socket.emit("previousMessages", messages);
-        }
-    );
-
-    //-------------------------------------------------------/
-    // Disconnect
-    //-------------------------------------------------------/
-    socket.on("disconnect", () => {
-        const user = [...connectedSockets.entries()].find(
-            ([, socketId]) => socketId === socket.id
-        )?.[0];
-        if (user) {
-            connectedSockets.delete(user);
-            connectedUsers.delete(user);
-            io.emit("userStatus", {
-                userId: user,
-                isOnline: false,
-            });
         }
     });
 
@@ -196,10 +148,16 @@ io.on("connection", (socket) => {
         });
     });
 
-    socket.on("userStatus", ({ userId, isOnline }) => {
-        const dot = document.getElementById("onlineStatusDot");
-        if (recipientId === userId && dot) {
-            dot.style.backgroundColor = isOnline ? "limegreen" : "gray";
+    //-------------------------------------------------------/
+    // Disconnect
+    //-------------------------------------------------------/
+    socket.on("disconnect", () => {
+        const user = [...connectedSockets.entries()].find(
+            ([, socketId]) => socketId === socket.id
+        )?.[0];
+        if (user) {
+            connectedSockets.delete(user);
+            connectedUsers.delete(user);
         }
     });
 });

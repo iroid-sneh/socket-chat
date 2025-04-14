@@ -1,17 +1,15 @@
 const socket = io();
-socket.emit("join", { userId: senderId });
-
-const fileInput = document.getElementById("fileInput");
-const selectedFileName = document.getElementById("selectedFileName");
-const sendBtn = document.getElementById("sendBtn");
 
 const senderId = document.getElementById("currentUserId").value;
 const recipientId = document.getElementById("recipientUserId").value;
 const chatInput = document.getElementById("textarea1");
-const isGroupChat = document.getElementById("isGroup")?.value === "true";
-
 const chatBox = document.querySelector(".chat-box");
-let lastMessageId = null;
+const isGroupChat = document.getElementById("isGroup")?.value === "true";
+const fileInput = document.getElementById("fileInput");
+const selectedFileName = document.getElementById("selectedFileName");
+const sendBtn = document.getElementById("sendBtn");
+
+socket.emit("join", { userId: senderId });
 
 $("#textarea1").keypress(function (e) {
     if (e.keyCode === 13 && !e.shiftKey) {
@@ -56,26 +54,29 @@ socket.on("message", (msg) => {
         content = msg.message;
     }
 
-    const nameTag =
-        !isSelf && msg.senderName
-            ? `<div class="fw-semibold mb-1">${msg.senderName}</div>`
-            : "";
+    let nameTag = "";
+    if (isGroupChat && !isSelf && msg.senderName) {
+        nameTag = `<div class="fw-semibold mb-1">${msg.senderName}</div>`;
+    }
 
     const chatItem = `
-    <li class="chat-item ${alignment} list-style-none mt-3">
-        <div class="chat-content d-inline-block ps-3">
-            ${nameTag}
-            <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
-                ${content}
-            </div>
-        </div>
-        <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
-            ${new Date(msg.createdAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-            })}
-        </div>
-    </li>`;
+                        <li class="chat-item ${alignment} list-style-none mt-3">
+                            <div class="chat-content d-inline-block ps-3">
+                                                ${nameTag}
+                                <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
+                                        ${content}
+                                </div>
+                            </div>
+                            <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
+                                ${new Date(msg.createdAt).toLocaleTimeString(
+                                    [],
+                                    {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    }
+                                )}
+                            </div>
+                        </li>`;
 
     $("#chat-list").append(chatItem);
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -84,13 +85,16 @@ socket.on("message", (msg) => {
 function setRecipient(id, name) {
     document.getElementById("recipientUserId").value = id;
     $("#chat-list").html("");
-
-    socket.emit("loadMessages", {
-        sender: senderId,
-        recipient: id,
-        isGroup: false,
-    });
 }
+
+socket.on("onlineUsers", (onlineUserIds) => {
+    const dot = document.getElementById("onlineStatusDot");
+    if (onlineUserIds.includes(recipientId)) {
+        dot.style.backgroundColor = "limegreen";
+    } else {
+        dot.style.backgroundColor = "gray";
+    }
+});
 
 const typingStatus = document.getElementById("typing-status");
 let typingTimeout;
@@ -117,12 +121,12 @@ socket.on("typing", ({ sender }) => {
             typingBubble.className = "chat-item list-style-none mt-3";
 
             typingBubble.innerHTML = `
-                                  <div class="chat-content d-inline-block ps-3">
-                                      <div class="box msg p-2 d-inline-block mb-1 bg-light rounded">
-                                          <i>Typing...</i>
-                                      </div>
-                                  </div>
-                              `;
+                      <div class="chat-content d-inline-block ps-3">
+                          <div class="box msg p-2 d-inline-block mb-1 bg-light rounded">
+                              <i>Typing...</i>
+                          </div>
+                      </div>
+                  `;
 
             document.getElementById("chat-list").appendChild(typingBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -153,15 +157,6 @@ fileInput.addEventListener("change", async (e) => {
     e.target.value = "";
     selectedFileName.textContent = "";
     selectedFileName.style.display = "none";
-});
-
-socket.on("onlineUsers", (onlineUserIds) => {
-    const dot = document.getElementById("onlineStatusDot");
-    if (onlineUserIds.includes(recipientId)) {
-        dot.style.backgroundColor = "limegreen";
-    } else {
-        dot.style.backgroundColor = "gray";
-    }
 });
 
 function toggleUserSelection(userId) {
