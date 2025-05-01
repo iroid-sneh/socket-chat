@@ -66,13 +66,21 @@ if (isSecure) {
         };
     }
     const https = require("https").Server(options, app);
-    https.listen(port, () => {
+    https.listen(port, "0.0.0.0", () => {
         console.log(
             `Https server is running on  ${process.env.BASE_URL}:${process.env.PORT}`
         );
     });
 } else {
-    server.listen(port, () => {
-        console.log(`Listening on port: ${process.env.BASE_URL}:${port}`);
+    server.listen(port, "0.0.0.0", () => {
+        console.log(
+            `Server running at: http://${process.env.BASE_URL}:${port}`
+        );
+        console.log(
+            `Access from other devices on same network: http://${
+                require("os").networkInterfaces().eth0?.[0]?.address ||
+                process.env.LOCAL_IP_ADDRESS
+            }:${port}`
+        );
     });
 }
