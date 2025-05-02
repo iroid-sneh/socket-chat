@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Chat Users</title>
         <link
             rel="stylesheet"
@@ -131,6 +132,69 @@
 
             .selectable-user:hover {
                 background-color: #e7f1ff;
+            }
+
+            /* Ensure container height on mobile doesn't overflow */
+            @media screen and (max-width: 768px) {
+                html,
+                body {
+                    height: 100%;
+                    width: 100%;
+                    margin: 0;
+                    padding: 0;
+                    overflow: hidden;
+                    background-color: #f0f2f5;
+                    padding-top: env(safe-area-inset-top);
+                    padding-left: env(safe-area-inset-left);
+                    padding-right: env(safe-area-inset-right);
+                    padding-bottom: env(safe-area-inset-bottom);
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                .container {
+                    width: 100vw;
+                    /* height: 100vh; */
+                    max-height: 100vh;
+                    border-radius: 0;
+                    margin: 0;
+                    box-shadow: none;
+                }
+
+                .header {
+                    position: sticky;
+                    top: env(safe-area-inset-top);
+                    background: white;
+                    z-index: 10;
+                }
+
+                .user-list {
+                    flex: 1;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                .search-box {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 10px;
+                }
+
+                .search-box input {
+                    flex: 1;
+                    font-size: 14px;
+                }
+
+                #createGroupBtn {
+                    width: 40px;
+                    height: 40px;
+                    padding: 0;
+                    font-size: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
             }
         </style>
     </head>

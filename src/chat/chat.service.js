@@ -163,6 +163,46 @@ class chatService {
             usersForGroup: usersForGroup,
         });
     }
+
+    /**
+     * @description: Get Private Chat Messages
+     * @param {*} req
+     * @param {*} res
+     */
+    static async getPrivateChatMessages(req, res) {
+        if (!req.user || !req.user._id) {
+            return res
+                .status(400)
+                .json({ error: "User is not authenticated properly." });
+        }
+
+        const userId = req.user._id;
+        const recipientId = req.params.id;
+
+        const messages = await ChatMessages.find({
+            $or: [
+                { senderId: userId, receiverId: recipientId },
+                { senderId: recipientId, receiverId: userId },
+            ],
+        }).sort({ createdAt: 1 });
+
+        res.json({ success: true, messages });
+    }
+
+    /**
+     * @description: Get Group Chat Messages
+     * @param {*} req
+     * @param {*} res
+     */
+    static async getGroupChatMessages(req, res) {
+        const groupId = req.params.id;
+
+        const messages = await GroupMessages.find({ groupId }).sort({
+            createdAt: 1,
+        });
+
+        res.json({ success: true, messages });
+    }
 }
 
 export default chatService;

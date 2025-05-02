@@ -106,6 +106,40 @@ io.on("connection", (socket) => {
         }
     });
 
+    socket.on("getMessages", async ({ userId, otherUserId }) => {
+        if (
+            !mongoose.Types.ObjectId.isValid(userId) ||
+            !mongoose.Types.ObjectId.isValid(otherUserId)
+        ) {
+            return socket.emit("chatHistory", []);
+        }
+
+        try {
+            const messages = await ChatMessages.find({
+                isGroup: false,
+                $or: [
+                    { senderId: userId, receiverId: otherUserId },
+                    { senderId: otherUserId, receiverId: userId },
+                ],
+            }).sort({ createdAt: 1 });
+
+            const messagesWithSenderNames = await Promise.all(
+                messages.map(async (msg) => {
+                    const sender = await User.findById(msg.senderId);
+                    return {
+                        ...msg.toObject(),
+                        senderName: sender?.name || "Unknown",
+                    };
+                })
+            );
+
+            socket.emit("chatHistory", messagesWithSenderNames);
+        } catch (err) {
+            console.error("Error fetching chat history:", err);
+            socket.emit("chatHistory", []);
+        }
+    });
+
     //-------------------------------------------------------/
     // File Sharing
     //-------------------------------------------------------/

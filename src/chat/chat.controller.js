@@ -40,6 +40,26 @@ class chatController {
         const data = await chatService.groupChatById(req.params.id, req, res);
         return;
     }
+
+    /**
+     * @description: Get Chat Messages Of Private Chats
+     * @param {*} req
+     * @param {*} res
+     */
+    static async getPrivateChatMessages(req, res) {
+        const data = await chatService.getPrivateChatMessages(req, res);
+        return;
+    }
+
+    /**
+     * @description: Get Chat Messages Of Groups Chats
+     * @param {*} req
+     * @param {*} res
+     */
+    static async getGroupChatMessages(req, res) {
+        const data = await chatService.getGroupChatMessages(req, res);
+        return;
+    }
 }
 
 export default chatController;

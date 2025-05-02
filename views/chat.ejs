@@ -38,6 +38,40 @@
             .rounded {
                 border-radius: 18px !important;
             }
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 9999;
+                padding-top: 60px;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0, 0, 0, 0.8);
+            }
+
+            .modal-content {
+                display: block;
+                margin: auto;
+                max-width: 90vw;
+                max-height: 80vh;
+                width: auto;
+                height: auto;
+                object-fit: contain;
+                border-radius: 10px;
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            }
+
+            .close {
+                position: absolute;
+                top: 20px;
+                right: 35px;
+                color: #fff;
+                font-size: 40px;
+                font-weight: bold;
+                cursor: pointer;
+            }
         </style>
     </head>
 
@@ -58,223 +92,227 @@
         >
             <div class="page-wrapper pt-0 mx-auto">
                 <div class="container-fluid">
+                    <!-- Mobile Toggle Button (Visible only on small screens) -->
+                    <button class="btn btn-primary d-lg-none mb-3" id="toggleSidebar">
+                        <i class="fas fa-users"></i>
+                        Toggle Contacts
+                    </button>
+
                     <div class="row">
-                        <div class="col-md-12">
+                        <!-- Sidebar Column - Hidden on mobile by default -->
+                        <div
+                            class="col-lg-3 col-xl-3 border-end d-none d-lg-block"
+                            id="sidebarColumn"
+                        >
                             <div class="card mb-0">
-                                <div class="row g-0">
-                                    <!-- Sidebar (User List + Search + Create Group Button) -->
-                                    <div class="col-lg-3 col-xl-2 border-end">
-                                        <div
-                                            class="card-body border-bottom d-flex align-items-center gap-2"
-                                        >
-                                            <form class="w-100">
-                                                <input
-                                                    class="form-control rounded-pill"
-                                                    type="text"
-                                                    placeholder="Search Contact"
-                                                />
-                                            </form>
-                                            <button
-                                                class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#createGroupModal"
-                                                style="width: 40px; height: 40px"
-                                                title="Create Group"
-                                            >
-                                                <i class="fas fa-users"></i>
-                                            </button>
-                                        </div>
-                                        <div
-                                            class="scrollable position-relative"
-                                            style="height: calc(100vh - 111px)"
-                                        >
-                                            <ul class="mailbox list-style-none">
-                                                <li>
-                                                    <div class="message-center">
-                                                        <div id="user-list">
-                                                            <% users.forEach(user => { %>
-                                                            <div
-                                                                class="user-card"
-                                                                data-name="<%= user.name.toLowerCase() %>"
-                                                            >
-                                                                <a
-                                                                    href="/api/v1/chat/<%= user._id %>"
-                                                                    style="
-                                                                        text-decoration: none;
-                                                                        color: inherit;
-                                                                    "
-                                                                >
-                                                                    <div
-                                                                        class="user d-flex align-items-center gap-2 p-2"
-                                                                    >
-                                                                        <img
-                                                                            src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
-                                                                            alt="User Avatar"
-                                                                            class="rounded-circle"
-                                                                            width="40"
-                                                                            height="40"
-                                                                        />
-                                                                        <div class="user-info">
-                                                                            <h6
-                                                                                class="user-name mb-0 fw-semibold"
-                                                                            >
-                                                                                <%= user.name %>
-                                                                            </h6>
-                                                                            <small
-                                                                                class="text-muted"
-                                                                            >
-                                                                                <%= user.lastMessage
-                                                                                || 'Tap to chat' %>
-                                                                            </small>
-                                                                        </div>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                            <% }) %> <% if (sideGroup &&
-                                                            sideGroup.length > 0) { %> <%
-                                                            sideGroup.forEach((group, index) => { %>
-                                                            <div
-                                                                class="user-card"
-                                                                data-name="<%= group.name.toLowerCase() %>"
-                                                                data-index="g<%= index %>"
-                                                            >
-                                                                <a
-                                                                    href="/api/v1/chat/group/<%= group._id %>"
-                                                                    style="
-                                                                        text-decoration: none;
-                                                                        color: inherit;
-                                                                    "
-                                                                >
-                                                                    <div
-                                                                        class="user d-flex align-items-center gap-2 p-2"
-                                                                    >
-                                                                        <img
-                                                                            src="/assets/images/background/group-img.jpg"
-                                                                            alt="Group Icon"
-                                                                            class="rounded-circle"
-                                                                            width="40"
-                                                                            height="40"
-                                                                        />
-                                                                        <div class="user-info">
-                                                                            <h6
-                                                                                class="user-name mb-0 fw-semibold"
-                                                                            >
-                                                                                <%= group.name %>
-                                                                            </h6>
-                                                                            <small
-                                                                                class="text-muted"
-                                                                            >
-                                                                                Group Chat
-                                                                            </small>
-                                                                        </div>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                            <% }) %> <% } %>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-lg-9 col-xl-10">
-                                        <div
-                                            class="chat-box scrollable position-relative"
-                                            style="height: calc(100vh - 111px)"
-                                        >
-                                            <ul
-                                                class="chat-list list-style-none px-3 pt-3"
-                                                id="chat-list"
-                                            >
-                                                <div
-                                                    class="d-flex align-items-center px-3 py-2 border-bottom"
-                                                >
-                                                    <% if (recipientId == groups._id) { %>
-                                                    <img
-                                                        src="/assets/images/background/group-img.jpg"
-                                                        alt="Group Icon"
-                                                        class="rounded-circle"
-                                                        width="40"
-                                                        height="40"
-                                                    />
-                                                    <% } else { %>
-                                                    <img
-                                                        src="<%= process.env.APP_URL_ADMIN %>/<%= recipientImage %>"
-                                                        alt="user"
-                                                        class="rounded-circle me-2"
-                                                        width="40"
-                                                        height="40"
-                                                    />
-                                                    <% } %>
-                                                    <h5 id="chatHeader" class="mb-0 fw-bold">
-                                                        <%= recipientName %>
-                                                        <span
-                                                            id="onlineStatusDot"
+                                <div
+                                    class="card-body border-bottom d-flex align-items-center gap-2"
+                                >
+                                    <form class="w-100">
+                                        <input
+                                            class="form-control rounded-pill"
+                                            type="text"
+                                            placeholder="Search Contact"
+                                        />
+                                    </form>
+                                    <button
+                                        class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#createGroupModal"
+                                        style="width: 40px; height: 40px"
+                                        title="Create Group"
+                                    >
+                                        <i class="fas fa-users"></i>
+                                    </button>
+                                </div>
+                                <div
+                                    class="scrollable position-relative"
+                                    style="height: calc(100vh - 111px)"
+                                >
+                                    <ul class="mailbox list-style-none">
+                                        <li>
+                                            <div class="message-center">
+                                                <div id="user-list">
+                                                    <% users.forEach(user => { %>
+                                                    <div
+                                                        class="user-card"
+                                                        data-name="<%= user.name.toLowerCase() %>"
+                                                    >
+                                                        <a
+                                                            href="/api/v1/chat/<%= user._id %>"
                                                             style="
-                                                                width: 10px;
-                                                                height: 10px;
-                                                                border-radius: 50%;
-                                                                margin-left: 8px;
-                                                                background-color: silver;
-                                                                display: inline-block;
+                                                                text-decoration: none;
+                                                                color: inherit;
                                                             "
-                                                        ></span>
-                                                    </h5>
-                                                </div>
-
-                                                <div
-                                                    id="typing-status"
-                                                    style="
-                                                        margin-left: 10px;
-                                                        color: gray;
-                                                        display: none;
-                                                    "
-                                                ></div>
-                                            </ul>
-                                        </div>
-
-                                        <div class="card-body border-top">
-                                            <div
-                                                id="selectedFileName"
-                                                class="text-muted mb-1"
-                                                style="font-size: 14px"
-                                            ></div>
-                                            <div class="row">
-                                                <div class="col-9">
-                                                    <div class="input-field mt-0 mb-0">
-                                                        <input
-                                                            id="textarea1"
-                                                            placeholder="Type and enter"
-                                                            class="form-control border-0"
-                                                            type="text"
-                                                        />
+                                                        >
+                                                            <div
+                                                                class="user d-flex align-items-center gap-2 p-2"
+                                                            >
+                                                                <img
+                                                                    src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
+                                                                    alt="User Avatar"
+                                                                    class="rounded-circle"
+                                                                    width="40"
+                                                                    height="40"
+                                                                />
+                                                                <div class="user-info">
+                                                                    <h6
+                                                                        class="user-name mb-0 fw-semibold"
+                                                                    >
+                                                                        <%= user.name %>
+                                                                    </h6>
+                                                                    <small class="text-muted">
+                                                                        <%= 'Tap to chat' %>
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                        </a>
                                                     </div>
-                                                </div>
-                                                <div class="col-3">
-                                                    <a
-                                                        class="btn-circle bg-cyan float-end text-white d-flex align-items-center justify-content-center"
-                                                        id="sendBtn"
-                                                        style="margin-left: 3px"
-                                                        href="#"
+                                                    <% }) %> <% if (sideGroup && sideGroup.length >
+                                                    0) { %> <% sideGroup.forEach((group, index) => {
+                                                    %>
+                                                    <div
+                                                        class="user-card"
+                                                        data-name="<%= group.name.toLowerCase() %>"
+                                                        data-index="g<%= index %>"
                                                     >
-                                                        <i class="fas fa-paper-plane"></i>
-                                                    </a>
-                                                    <label
-                                                        for="fileInput"
-                                                        class="btn-circle bg-cyan float-end text-white d-flex align-items-center justify-content-center"
-                                                        id="fileBtn"
-                                                        style="cursor: pointer"
-                                                    >
-                                                        <i class="fas fa-link"></i>
-                                                    </label>
-                                                    <input
-                                                        type="file"
-                                                        id="fileInput"
-                                                        style="display: none"
-                                                    />
+                                                        <a
+                                                            href="/api/v1/chat/group/<%= group._id %>"
+                                                            style="
+                                                                text-decoration: none;
+                                                                color: inherit;
+                                                            "
+                                                        >
+                                                            <div
+                                                                class="user d-flex align-items-center gap-2 p-2"
+                                                            >
+                                                                <img
+                                                                    src="/assets/images/background/group-img.jpg"
+                                                                    alt="Group Icon"
+                                                                    class="rounded-circle"
+                                                                    width="40"
+                                                                    height="40"
+                                                                />
+                                                                <div class="user-info">
+                                                                    <h6
+                                                                        class="user-name mb-0 fw-semibold"
+                                                                    >
+                                                                        <%= group.name %>
+                                                                    </h6>
+                                                                    <small class="text-muted">
+                                                                        Group Chat
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </div>
+                                                    <% }) %> <% } %>
                                                 </div>
                                             </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Area Column - Full width on mobile -->
+                        <div class="col-lg-8 col-xl-9" id="chatColumn">
+                            <div class="card mb-0">
+                                <div
+                                    class="chat-box scrollable position-relative"
+                                    style="height: calc(100vh - 111px)"
+                                >
+                                    <ul class="chat-list list-style-none px-3 pt-3" id="chat-list">
+                                        <div
+                                            class="d-flex align-items-center px-3 py-2 border-bottom position-sticky"
+                                            style="top: 0; background: white; z-index: 50"
+                                        >
+                                            <% if (recipientId == groups._id) { %>
+                                            <img
+                                                src="/assets/images/background/group-img.jpg"
+                                                alt="Group Icon"
+                                                class="rounded-circle"
+                                                width="40"
+                                                height="40"
+                                            />
+                                            <% } else { %>
+                                            <img
+                                                src="<%= process.env.APP_URL_ADMIN %>/<%= recipientImage %>"
+                                                alt="user"
+                                                class="rounded-circle me-2"
+                                                width="40"
+                                                height="40"
+                                            />
+                                            <% } %>
+                                            <h5 id="chatHeader" class="mb-0 fw-bold">
+                                                <%= recipientName %>
+                                                <span
+                                                    id="onlineStatusDot"
+                                                    style="
+                                                        width: 10px;
+                                                        height: 10px;
+                                                        border-radius: 50%;
+                                                        margin-left: 8px;
+                                                        background-color: silver;
+                                                        display: inline-block;
+                                                    "
+                                                ></span>
+                                            </h5>
+                                        </div>
+
+                                        <div
+                                            id="typing-status"
+                                            style="margin-left: 10px; color: gray; display: none"
+                                        ></div>
+                                    </ul>
+                                </div>
+
+                                <div class="card-body border-top">
+                                    <div
+                                        id="selectedFileName"
+                                        class="text-muted mb-1"
+                                        style="font-size: 14px"
+                                    ></div>
+                                    <div class="row align-items-center">
+                                        <div class="col-8 col-sm-9">
+                                            <div class="input-field mt-0 mb-0">
+                                                <input
+                                                    id="textarea1"
+                                                    placeholder="Type and enter"
+                                                    class="form-control border-0"
+                                                    type="text"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="col-4 col-sm-3 d-flex gap-2 justify-content-end"
+                                        >
+                                            <label
+                                                for="fileInput"
+                                                class="btn-circle bg-cyan text-white d-flex align-items-center justify-content-center"
+                                                id="fileBtn"
+                                                style="
+                                                    cursor: pointer;
+                                                    width: 40px;
+                                                    height: 40px;
+                                                    flex-shrink: 0;
+                                                "
+                                            >
+                                                <i class="fas fa-link"></i>
+                                            </label>
+                                            <a
+                                                class="btn-circle bg-cyan text-white d-flex align-items-center justify-content-center"
+                                                id="sendBtn"
+                                                style="width: 40px; height: 40px; flex-shrink: 0"
+                                                href="#"
+                                            >
+                                                <i class="fas fa-paper-plane"></i>
+                                            </a>
+                                            <input
+                                                type="file"
+                                                id="fileInput"
+                                                style="display: none"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -285,6 +323,7 @@
             </div>
         </div>
 
+        <!-- Create Group Modal -->
         <div
             class="modal fade"
             id="createGroupModal"
@@ -319,7 +358,7 @@
                                     class="d-flex flex-column gap-2"
                                     style="max-height: 250px; overflow-y: auto"
                                 >
-                                    <% usersForGroup.forEach(user=> { %>
+                                    <% usersForGroup.forEach(user => { %>
                                     <div
                                         class="user d-flex align-items-center px-2 py-1 rounded border"
                                         style="cursor: pointer"
@@ -352,59 +391,9 @@
             </div>
         </div>
 
-        <div
-            id="dark-header-modal"
-            data-bs-target="#chatHeader"
-            class="modal fade"
-            tabindex="-1"
-            role="dialog"
-            aria-labelledby="dark-header-modalLabel"
-            aria-hidden="true"
-        >
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header modal-colored-header bg-dark">
-                        <h4 class="modal-title" id="dark-header-modalLabel"><%= groups.name %></h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <div
-                                id="groupUserList"
-                                class="d-flex flex-column gap-2"
-                                style="max-height: 250px; overflow-y: auto"
-                            >
-                                <% sideGroup.forEach(user=> { %>
-                                <div
-                                    class="user d-flex align-items-center px-2 py-1 rounded border"
-                                    style="cursor: pointer"
-                                    onclick="toggleUserSelection('<%= user._id %>')"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        name="groupMembers"
-                                        value="<%= user._id %>"
-                                        id="user_<%= user._id %>"
-                                        class="form-check-input me-2 d-none"
-                                    />
-                                    <img
-                                        src="<%= process.env.APP_URL_ADMIN %>/<%= user.image %>"
-                                        class="rounded-circle me-2"
-                                        width="40"
-                                        height="40"
-                                    />
-                                    <span><%= user.name %></span>
-                                </div>
-                                <% }); %>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div id="imgModal" class="modal" onclick="this.style.display='none'">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modalImage" />
         </div>
 
         <script src="/socket.io/socket.io.js"></script>
@@ -427,8 +416,89 @@
             const fileInput = document.getElementById("fileInput");
             const selectedFileName = document.getElementById("selectedFileName");
             const sendBtn = document.getElementById("sendBtn");
+            const sidebar = document.getElementById("sidebarColumn");
 
+            // Join current user to socket
             socket.emit("join", { userId: senderId });
+
+            // Load previous messages on page load
+            loadPreviousMessages();
+
+            async function loadPreviousMessages() {
+                const url = isGroupChat
+                    ? `/api/v1/chat/group/messages/${recipientId}`
+                    : `/api/v1/chat/messages/${recipientId}`;
+
+                try {
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    console.log("Fetched messages:", data);
+
+                    if (data.success && Array.isArray(data.messages)) {
+                        data.messages.forEach((msg) => renderMessage(msg));
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                } catch (err) {
+                    console.error("Failed to load previous messages:", err);
+                }
+            }
+
+            function renderMessage(msg) {
+                const isSelf = msg.senderId === senderId;
+                const alignment = isSelf ? "odd text-end" : "";
+                const bgClass = isSelf ? "bg-primary text-white" : "bg-light";
+
+                let content;
+                if (msg.message?.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                    content = `<img src="${msg.message}" style="max-width:200px; max-height:200px; cursor: zoom-in;" onclick="openModal(this.src)">`;
+                } else if (msg.isVideo || msg.message?.match(/\.(mp4|webm|ogg)$/i)) {
+                    content = `<video controls src="${msg.message}" width="250" style="max-height: 200px;"></video>`;
+                } else if (msg.isAudio || msg.message?.match(/\.(mp3|wav|ogg)$/i)) {
+                    content = `<audio controls src="${msg.message}" style="width: 250px;"></audio>`;
+                } else if (msg.message?.startsWith("/media/")) {
+                    content = `<a href="${
+                        msg.message
+                    }" download style="color: black">📎 ${msg.message.split("/").pop()}</a>`;
+                } else {
+                    content = msg.message;
+                }
+
+                const nameTag =
+                    isGroupChat && !isSelf && msg.senderName
+                        ? `<div class="fw-semibold mb-1">${msg.senderName}</div>`
+                        : "";
+
+                const chatItem = `
+            <li class="chat-item ${alignment} list-style-none mt-3">
+                <div class="chat-content d-inline-block ps-3">
+                    ${nameTag}
+                    <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
+                        ${content}
+                    </div>
+                </div>
+                <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
+                    ${new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    })}
+                </div>
+            </li>`;
+                document.getElementById("chat-list").insertAdjacentHTML("beforeend", chatItem);
+            }
+
+            // Toggle sidebar for mobile
+            const toggleBtn = document.getElementById("toggleSidebar");
+            toggleBtn?.addEventListener("click", () => {
+                sidebar.classList.toggle("d-none");
+            });
+
+            const isMobile = () => window.innerWidth < 992;
+
+            document.querySelectorAll(".user-card a").forEach((link) => {
+                link.addEventListener("click", () => {
+                    if (isMobile()) sidebar.classList.add("d-none");
+                });
+            });
 
             $("#textarea1").keypress(function (e) {
                 if (e.keyCode === 13 && !e.shiftKey) {
@@ -442,74 +512,28 @@
                             isGroup: isGroupChat,
                         });
                         $(this).val("");
-
-                        socket.emit("stopTyping", {
-                            sender: senderId,
-                            recipient: recipientId,
-                        });
+                        socket.emit("stopTyping", { sender: senderId, recipient: recipientId });
                         isTyping = false;
                     }
                 }
             });
 
             socket.on("message", (msg) => {
-                const isSelf = msg.senderId === senderId;
-                const alignment = isSelf ? "odd text-end" : "";
-                const bgClass = isSelf ? "bg-primary text-white" : "bg-light";
-
-                let content;
-
-                if (msg.message?.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                    content = `<img src="${msg.message}" style="max-width:200px; max-height:200px;">`;
-                } else if (msg.isVideo || msg.message?.match(/\.(mp4|webm|ogg)$/i)) {
-                    content = `<video controls src="${msg.message}" width="250" style="max-height: 200px;"></video>`;
-                } else if (msg.isAudio || msg.message?.match(/\.(mp3|wav|ogg)$/i)) {
-                    content = `<audio controls src="${msg.message}" style="width: 250px;"></audio>`;
-                } else if (msg.message?.startsWith("/media/")) {
-                    content = `<a href="${msg.message}" download>📎 ${msg.message
-                        .split("/")
-                        .pop()}</a>`;
-                } else {
-                    content = msg.message;
-                }
-
-                let nameTag = "";
-                if (isGroupChat && !isSelf && msg.senderName) {
-                    nameTag = `<div class="fw-semibold mb-1">${msg.senderName}</div>`;
-                }
-
-                const chatItem = `
-                        <li class="chat-item ${alignment} list-style-none mt-3">
-                            <div class="chat-content d-inline-block ps-3">
-                                                ${nameTag}
-                                <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
-                                        ${content}
-                                </div>
-                            </div>
-                            <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
-                                ${new Date(msg.createdAt).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                })}
-                            </div>
-                        </li>`;
-
-                $("#chat-list").append(chatItem);
+                renderMessage(msg);
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
 
             function setRecipient(id, name) {
                 document.getElementById("recipientUserId").value = id;
                 $("#chat-list").html("");
+                loadPreviousMessages(); // Load messages when user changes
             }
 
             socket.on("onlineUsers", (onlineUserIds) => {
                 const dot = document.getElementById("onlineStatusDot");
-                if (onlineUserIds.includes(recipientId)) {
-                    dot.style.backgroundColor = "limegreen";
-                } else {
-                    dot.style.backgroundColor = "gray";
-                }
+                dot.style.backgroundColor = onlineUserIds.includes(recipientId)
+                    ? "limegreen"
+                    : "gray";
             });
 
             const typingStatus = document.getElementById("typing-status");
@@ -530,23 +554,18 @@
             });
 
             socket.on("typing", ({ sender }) => {
-                if (sender === recipientId) {
-                    if (!document.getElementById("typing-indicator")) {
-                        const typingBubble = document.createElement("li");
-                        typingBubble.id = "typing-indicator";
-                        typingBubble.className = "chat-item list-style-none mt-3";
-
-                        typingBubble.innerHTML = `
-                      <div class="chat-content d-inline-block ps-3">
-                          <div class="box msg p-2 d-inline-block mb-1 bg-light rounded">
-                              <i>Typing...</i>
-                          </div>
-                      </div>
-                  `;
-
-                        document.getElementById("chat-list").appendChild(typingBubble);
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    }
+                if (sender === recipientId && !document.getElementById("typing-indicator")) {
+                    const typingBubble = document.createElement("li");
+                    typingBubble.id = "typing-indicator";
+                    typingBubble.className = "chat-item list-style-none mt-3";
+                    typingBubble.innerHTML = `
+                <div class="chat-content d-inline-block ps-3">
+                    <div class="box msg p-2 d-inline-block mb-1 bg-light rounded">
+                        <i>Typing...</i>
+                    </div>
+                </div>`;
+                    document.getElementById("chat-list").appendChild(typingBubble);
+                    chatBox.scrollTop = chatBox.scrollHeight;
                 }
             });
 
@@ -570,6 +589,7 @@
                     fileName: file.name,
                     fileBuffer: [...fileBuffer],
                 });
+
                 e.target.value = "";
                 selectedFileName.textContent = "";
                 selectedFileName.style.display = "none";
@@ -583,7 +603,7 @@
 
             document
                 .getElementById("createGroupForm")
-                .addEventListener("submit", async function (e) {
+                ?.addEventListener("submit", async function (e) {
                     e.preventDefault();
 
                     const name = document.getElementById("groupName").value.trim();
@@ -621,9 +641,8 @@
 
             const groupId = "<%= groups && groups._id %>";
             const currentChatId = "<%= recipientId %>";
-            const recipientName = "<%= recipientName %>";
 
-            document.getElementById("chatHeader").addEventListener("click", () => {
+            document.getElementById("chatHeader")?.addEventListener("click", () => {
                 if (groupId && currentChatId === groupId) {
                     const groupModal = new bootstrap.Modal(
                         document.getElementById("dark-header-modal")
@@ -631,6 +650,13 @@
                     groupModal.show();
                 }
             });
+
+            function openModal(src) {
+                const modal = document.getElementById("imgModal");
+                const modalImg = document.getElementById("modalImage");
+                modal.style.display = "block";
+                modalImg.src = src;
+            }
         </script>
     </body>
 </html>
