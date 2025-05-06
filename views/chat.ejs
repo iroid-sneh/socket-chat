@@ -410,6 +410,7 @@
 
             const senderId = document.getElementById("currentUserId").value;
             const recipientId = document.getElementById("recipientUserId").value;
+            let activeChatId = recipientId;
             const chatInput = document.getElementById("textarea1");
             const chatBox = document.querySelector(".chat-box");
             const isGroupChat = document.getElementById("isGroup")?.value === "true";
@@ -519,14 +520,30 @@
             });
 
             socket.on("message", (msg) => {
-                renderMessage(msg);
-                chatBox.scrollTop = chatBox.scrollHeight;
+                const isGroup = isGroupChat;
+                const isForCurrentChat = isGroup
+                    ? msg.groupId === activeChatId
+                    : (msg.senderId === senderId && msg.receiverId === activeChatId) ||
+                      (msg.senderId === activeChatId && msg.receiverId === senderId);
+
+                if (isForCurrentChat) {
+                    renderMessage(msg);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } else {
+                    console.log(
+                        "Ignored message from",
+                        msg.senderId,
+                        "because activeChatId is",
+                        activeChatId
+                    );
+                }
             });
 
             function setRecipient(id, name) {
                 document.getElementById("recipientUserId").value = id;
+                activeChatId = id;
                 $("#chat-list").html("");
-                loadPreviousMessages(); // Load messages when user changes
+                loadPreviousMessages();
             }
 
             socket.on("onlineUsers", (onlineUserIds) => {
@@ -554,7 +571,7 @@
             });
 
             socket.on("typing", ({ sender }) => {
-                if (sender === recipientId && !document.getElementById("typing-indicator")) {
+                if (sender === activeChatId && !document.getElementById("typing-indicator")) {
                     const typingBubble = document.createElement("li");
                     typingBubble.id = "typing-indicator";
                     typingBubble.className = "chat-item list-style-none mt-3";
@@ -570,7 +587,7 @@
             });
 
             socket.on("stopTyping", ({ sender }) => {
-                if (sender === recipientId) {
+                if (sender === activeChatId) {
                     const typingBubble = document.getElementById("typing-indicator");
                     if (typingBubble) typingBubble.remove();
                 }
