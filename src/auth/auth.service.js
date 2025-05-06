@@ -19,7 +19,7 @@ class authServices {
                 });
             }
 
-            console.log("FIle", file);
+            // console.log("FIle", file);
             const hashedPassword = await bcrypt.hash(password, 10);
             const image = `users/${file.filename}`;
             const user = await User.create({
