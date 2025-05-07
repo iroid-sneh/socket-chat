@@ -170,6 +170,7 @@ class chatService {
      * @param {*} res
      */
     static async getPrivateChatMessages(req, res) {
+        // console.log("Fetching private chat messages...");
         if (!req.user || !req.user._id) {
             return res
                 .status(400)
@@ -178,15 +179,36 @@ class chatService {
 
         const userId = req.user._id;
         const recipientId = req.params.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
 
-        const messages = await ChatMessages.find({
-            $or: [
-                { senderId: userId, receiverId: recipientId },
-                { senderId: recipientId, receiverId: userId },
-            ],
-        }).sort({ createdAt: 1 });
+        try {
+            const messages = await ChatMessages.find({
+                $or: [
+                    { senderId: userId, receiverId: recipientId },
+                    { senderId: recipientId, receiverId: userId },
+                ],
+            })
+                .sort({ createdAt: -1 })
+                .limit(limit)
+                .skip((page - 1) * limit);
 
-        res.json({ success: true, messages });
+            const totalMessages = await ChatMessages.countDocuments({
+                $or: [
+                    { senderId: userId, receiverId: recipientId },
+                    { senderId: recipientId, receiverId: userId },
+                ],
+            });
+
+            res.json({
+                success: true,
+                messages,
+                hasMore: page * limit < totalMessages,
+            });
+        } catch (error) {
+            console.error("Error fetching messages:", error);
+            return res.status(500).json({ error: "Internal server error" });
+        }
     }
 
     /**

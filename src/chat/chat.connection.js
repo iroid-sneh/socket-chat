@@ -34,6 +34,7 @@ io.on("connection", (socket) => {
         userGroups.forEach((group) => socket.join(group._id.toString()));
 
         socket.emit("onlineUsers", Array.from(connectedUsers));
+        socket.broadcast.emit("onlineUsers", Array.from(connectedUsers));
     });
 
     //-------------------------------------------------------/
@@ -192,6 +193,8 @@ io.on("connection", (socket) => {
         if (user) {
             connectedSockets.delete(user);
             connectedUsers.delete(user);
+
+            socket.broadcast.emit("onlineUsers", Array.from(connectedUsers));
         }
     });
 });
