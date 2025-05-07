@@ -61,8 +61,9 @@ class chatService {
             .populate("members", "name image")
             .populate("admin", "name");
 
-        const recipient = await User.findById(recipientId);
         const groups = await ChatGroup.find({ members: sender._id });
+
+        const recipient = await User.findById(recipientId);
         const leftSidePanelGroups = await ChatGroup.find({
             _id: { $nin: [groups._id] },
         });
@@ -90,7 +91,7 @@ class chatService {
             recipientImage: recipient.image,
             users,
             initialMessages: messages,
-            groups,
+            group: group,
             sideGroup: leftSidePanelGroups,
             usersForGroup: usersForGroup,
             isGroup: false,
@@ -158,7 +159,7 @@ class chatService {
             initialMessages: messages,
             isGroup: true,
             groupMembers: group.members,
-            groups: group,
+            group: group,
             sideGroup: leftSidePanelGroups,
             usersForGroup: usersForGroup,
         });

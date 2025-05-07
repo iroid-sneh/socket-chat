@@ -194,7 +194,7 @@ io.on("connection", (socket) => {
             connectedSockets.delete(user);
             connectedUsers.delete(user);
 
-            socket.broadcast.emit("onlineUsers", Array.from(connectedUsers));
+            socket.broadcast.emit("onlineUsers", { userId: user });
         }
     });
 });

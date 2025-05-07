@@ -226,7 +226,7 @@
                                         class="d-flex align-items-center px-3 py-2 border-bottom position-sticky"
                                         style="top: 0; background: white; z-index: 50"
                                     >
-                                        <% if (recipientId == groups._id) { %>
+                                        <% if (group && recipientId == group._id.toString()) { %>
                                         <img
                                             src="/assets/images/background/group-img.jpg"
                                             alt="Group Icon"
@@ -243,8 +243,10 @@
                                             height="40"
                                         />
                                         <% } %>
-                                        <h5 id="chatHeader" class="mb-0 fw-bold">
-                                            <%= recipientName %>
+                                        <h5 id="chatHeader" class="mb-0 fw-bold" <% if (group) { %>
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#groupUsersListModal" <% } %> > <%=
+                                            recipientName %>
                                             <span
                                                 id="onlineStatusDot"
                                                 style="
@@ -319,6 +321,51 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="modal fade"
+            id="groupUsersListModal"
+            tabindex="-1"
+            aria-labelledby="groupUsersListModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="groupUsersListModalLabel">
+                            <%= group ? group.name : 'Group Members' %>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <div
+                                id="groupUserList"
+                                class="d-flex flex-column gap-2"
+                                style="max-height: 250px; overflow-y: auto"
+                            >
+                                <% if (group && group.members) { %> <% group.members.forEach(user =>
+                                { %>
+                                <div
+                                    class="user d-flex align-items-center px-2 py-1 rounded border"
+                                    style="cursor: pointer"
+                                    onclick="toggleUserSelection('<%= user._id %>')"
+                                >
+                                    <img
+                                        src="/<%= user.image %>"
+                                        class="rounded-circle me-2"
+                                        width="40"
+                                        height="40"
+                                    />
+                                    <span><%= user.name %></span>
+                                </div>
+                                <% }); %> <% } %>
                             </div>
                         </div>
                     </div>
@@ -685,7 +732,7 @@
                     }
                 });
 
-            const groupId = "<%= groups && groups._id %>";
+            const groupId = "<%= group && group._id %>";
             const currentChatId = "<%= recipientId %>";
 
             document.getElementById("chatHeader")?.addEventListener("click", () => {
