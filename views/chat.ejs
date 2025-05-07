@@ -502,7 +502,10 @@
             }
 
             function renderMessage(msg, isNew = false) {
-                const isSelf = msg.senderId === senderId;
+                // Handle both populated and unpopulated senderId cases
+                const senderIdValue = msg.senderId?._id ? msg.senderId._id : msg.senderId;
+                const isSelf = senderIdValue === senderId;
+
                 const alignment = isSelf ? "odd text-end" : "";
                 const bgClass = isSelf ? "bg-primary text-white" : "bg-light";
 
@@ -521,26 +524,36 @@
                     content = msg.message;
                 }
 
-                const nameTag =
-                    isGroupChat && !isSelf && msg.senderName
-                        ? `<div class="fw-semibold mb-1">${msg.senderName}</div>`
-                        : "";
+                // Get sender name - handle both populated object and string ID cases
+                let senderName = "";
+                if (isGroupChat && !isSelf) {
+                    if (msg.senderId?.name) {
+                        senderName = msg.senderId.name; // populated case
+                    } else if (msg.senderName) {
+                        senderName = msg.senderName; // fallback if senderName is included in message
+                    }
+                }
+
+                const nameTag = senderName
+                    ? `<div class="fw-semibold mb-1">${senderName}</div>`
+                    : "";
 
                 const chatItem = `
-            <li class="chat-item ${alignment} list-style-none mt-3">
-                <div class="chat-content d-inline-block ps-3">
-                    ${nameTag}
-                    <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
-                        ${content}
-                    </div>
+        <li class="chat-item ${alignment} list-style-none mt-3">
+            <div class="chat-content d-inline-block ps-3">
+                ${nameTag}
+                <div class="box msg p-2 d-inline-block mb-1 ${bgClass} rounded">
+                    ${content}
                 </div>
-                <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
-                    ${new Date(msg.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    })}
-                </div>
-            </li>`;
+            </div>
+            <div class="chat-time d-block font-10 mt-1 mr-0 mb-2">
+                ${new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                })}
+            </div>
+        </li>`;
+
                 document
                     .getElementById("chat-list")
                     .insertAdjacentHTML(isNew ? "beforeend" : "afterbegin", chatItem);

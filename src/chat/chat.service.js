@@ -152,11 +152,11 @@ class chatService {
         res.render("chat", {
             senderId: req.user._id,
             recipientId: group._id,
-            senderName: req.user.name,
+            // senderName: req.user.name,
             recipientName: group.name,
             recipientImage: "/assets/images/background/group-img.jpg",
             users,
-            initialMessages: messages,
+            messages,
             isGroup: true,
             groupMembers: group.members,
             group: group,
@@ -204,6 +204,8 @@ class chatService {
             res.json({
                 success: true,
                 messages,
+                senderId: req.user._id,
+                senderName: req.user.name,
                 hasMore: page * limit < totalMessages,
             });
         } catch (error) {
@@ -220,11 +222,16 @@ class chatService {
     static async getGroupChatMessages(req, res) {
         const groupId = req.params.id;
 
-        const messages = await GroupMessages.find({ groupId }).sort({
-            createdAt: 1,
-        });
+        const messages = await GroupMessages.find({ groupId })
+            .sort({
+                createdAt: -1,
+            })
+            .populate("senderId", "name image");
 
-        res.json({ success: true, messages });
+        res.json({
+            success: true,
+            messages,
+        });
     }
 }
 
